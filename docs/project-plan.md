@@ -1,531 +1,440 @@
 # OSINT Toolkit Local - Project Plan
 
-## 1. Ringkasan Konsep Project
+## 1. Project Overview
 
-**OSINT Toolkit Local** adalah aplikasi dashboard lokal untuk membantu proses investigasi OSINT yang legal dan etis terhadap data publik.
+**OSINT Toolkit Local** adalah aplikasi dashboard lokal untuk membantu analisis OSINT legal dan etis terhadap data publik. Aplikasi berjalan di `localhost`, menyimpan hasil ke database lokal PostgreSQL, dan ditujukan sebagai portfolio **cybersecurity + software engineering**.
 
-Project ini berjalan di `localhost` dan menerima input berupa:
+Target input awal:
 
 - Domain
 - Email
 - Username
 - IP address
 
-Aplikasi akan menjalankan lookup sederhana, mengelompokkan hasil analisis, menyimpan riwayat pencarian, dan menghasilkan report PDF.
+Output utama:
 
-Fokus utama project:
+- Dashboard hasil analisis
+- Riwayat scan
+- Detail hasil per target
+- Export report PDF
 
-- Cybersecurity portfolio
-- Software engineering portfolio
-- Demonstrasi integrasi backend, frontend, database, worker, dan report generator
-- Tidak melakukan brute force, bypass login, exploit, scraping agresif, atau akses tidak sah
+Batasan utama:
 
-Contoh use case:
+- Hanya mengambil data publik.
+- Tidak brute force.
+- Tidak bypass login.
+- Tidak exploit target.
+- Tidak scanning agresif.
+- Tidak mengambil data dari area privat atau autentikasi.
 
-- Mengecek informasi publik dari sebuah domain
-- Melihat DNS record
-- Mengecek format dan MX record email
-- Mengecek keberadaan username di platform publik tertentu
-- Mengecek reputasi IP melalui provider OSINT
-- Menghasilkan report investigasi ringan dalam bentuk PDF
+## 2. Review Planning Sebelumnya
 
-## 2. MVP Paling Realistis
+Planning sebelumnya sudah kuat di sisi konsep OSINT, batasan etis, roadmap, dan daftar fitur. Namun perlu disesuaikan sebelum coding karena:
 
-MVP sebaiknya dibuat sederhana tapi lengkap secara alur.
+- Stack lama masih mengarah ke **FastAPI + SQLite**, sedangkan stack final adalah **ASP.NET Core Web API (.NET 9) + PostgreSQL + EF Core**.
+- Endpoint terlalu banyak dan terlalu spesifik untuk MVP. Untuk awal, lebih baik pakai endpoint scan generik agar arsitektur tidak cepat melebar.
+- Backend perlu dipisah menjadi layer `Api`, `Core`, `Infrastructure`, dan `Tests`.
+- Sprint 0 harus fokus ke foundation: solution structure, database connection, health check, CI-ready test project, dan dokumentasi.
+- Fitur OSINT belum boleh diimplementasikan pada Sprint 0.
+- Python worker sebaiknya tetap opsional, bukan fondasi utama.
 
-### MVP Scope
+Keputusan revisi:
 
-Input awal:
+- Gunakan `.NET 9` sebagai backend utama.
+- Gunakan `React + Vite + TypeScript` untuk frontend.
+- Gunakan `PostgreSQL` untuk database lokal.
+- Gunakan `Entity Framework Core` untuk ORM dan migration.
+- Gunakan `xUnit` untuk testing backend.
+- Gunakan endpoint MVP yang sedikit, stabil, dan scan-centric.
 
-- Domain
-- Email
-- IP address
+## 3. Final Tech Stack
 
-Fitur MVP:
-
-- Dashboard sederhana
-- Domain DNS lookup
-- WHOIS lookup dasar
-- Email format validation
-- Email domain MX lookup
-- IP geolocation sederhana
-- Simpan hasil scan ke database lokal
-- Halaman detail hasil scan
-- Export report PDF sederhana
-
-Fitur yang ditunda setelah MVP:
-
-- Username checker multi-platform
-- Subdomain finder lebih lengkap
-- IP reputation dengan API eksternal
-- Risk scoring otomatis
-- Queue worker background
-- Authentication user lokal
-
-Tujuan MVP:
-
-> User bisa memasukkan target, sistem menjalankan beberapa lookup legal berbasis data publik, hasil tampil di dashboard, lalu bisa diexport menjadi PDF.
-
-## 3. Daftar Fitur Prioritas
-
-### 3.1 Domain Recon
-
-Mengumpulkan informasi dasar dari domain publik.
-
-Data yang dikumpulkan:
-
-- Domain name
-- DNS records
-- WHOIS information
-- Registrar
-- Creation date
-- Expiration date
-- Name servers
-- MX records
-- TXT records
-- Basic HTTP metadata
-
-Catatan etis:
-
-- Aman selama hanya membaca data publik.
-- Tidak melakukan scanning agresif.
-- Tidak melakukan exploit atau bypass akses.
-
-### 3.2 DNS Lookup
-
-Melakukan lookup DNS record dari domain.
-
-Record awal:
-
-- A
-- AAAA
-- MX
-- NS
-- TXT
-- CNAME
-- SOA
-
-Contoh output:
+### Frontend
 
 ```text
-A Record:
-- 104.21.x.x
-- 172.67.x.x
-
-MX Record:
-- mail.example.com
+React + Vite + TypeScript
 ```
 
-Aman tanpa API key karena bisa menggunakan DNS resolver lokal atau library DNS.
+Alasan:
 
-### 3.3 WHOIS Lookup
+- Modern dan portfolio-friendly.
+- TypeScript menunjukkan engineering discipline.
+- Cocok untuk dashboard interaktif.
+- Vite ringan untuk development lokal.
 
-Mengambil informasi WHOIS domain.
-
-Output:
-
-- Registrar
-- Created date
-- Updated date
-- Expiry date
-- Name servers
-- Status domain
-- WHOIS raw text jika tersedia
-
-Catatan:
-
-- Beberapa domain memakai WHOIS privacy sehingga data pemilik bisa disembunyikan.
-- Hasil WHOIS bisa tidak konsisten tergantung TLD dan limit WHOIS server.
-
-### 3.4 Subdomain Finder Sederhana
-
-Gunakan metode pasif, bukan brute force agresif.
-
-Sumber aman:
-
-- Certificate Transparency logs
-- Public DNS sources
-- API seperti `crt.sh`
-- Dataset publik
-
-Output:
-
-- Subdomain
-- Source
-- Resolved IP jika tersedia
-- Status aktif jika dicek dengan DNS resolve ringan
-
-Hindari:
-
-- Bruteforce ribuan wordlist
-- Port scanning
-- Directory scanning
-- Crawling agresif
-
-### 3.5 Email Validation
-
-Validasi email secara pasif.
-
-Pemeriksaan:
-
-- Format email valid
-- Domain email valid
-- MX record tersedia
-- Disposable email check opsional
-- Domain reputation opsional
-
-Yang tidak dilakukan:
-
-- Tidak login ke mailbox
-- Tidak mencoba SMTP enumeration agresif
-- Tidak mengecek apakah inbox benar-benar aktif dengan metode intrusive
-
-### 3.6 Username Checker
-
-Mengecek apakah username muncul di beberapa platform publik.
-
-Cara aman:
-
-- Request halaman profil publik dengan rate limit.
-- Gunakan daftar platform terbatas.
-- Tampilkan status `found`, `not_found`, atau `unknown`.
-
-Platform awal:
-
-- GitHub
-- GitLab
-- Reddit
-- Medium
-
-Platform seperti Instagram atau X sebaiknya hanya dipertimbangkan jika akses publiknya stabil dan tidak melanggar Terms of Service.
-
-Batasan:
-
-- Tidak bypass login.
-- Tidak scraping halaman yang melarang automation.
-- Tidak mencoba password reset.
-- Tidak mengumpulkan data sensitif.
-
-### 3.7 IP Reputation Lookup
-
-Mengecek reputasi IP dari sumber OSINT.
-
-Data:
-
-- Geolocation
-- ASN
-- ISP
-- Country
-- Abuse score
-- Known malicious status
-- Proxy/VPN/Tor indicator jika tersedia
-
-Tanpa API key:
-
-- IP format validation
-- Reverse DNS
-- Basic geolocation dari database lokal seperti GeoLite2
-- ASN lookup jika memakai sumber lokal
-
-Butuh API key untuk reputasi yang lebih kuat:
-
-- AbuseIPDB
-- VirusTotal
-- GreyNoise
-- Shodan
-- SecurityTrails
-
-### 3.8 Report Generator PDF
-
-Membuat laporan hasil investigasi.
-
-Isi report:
-
-- Judul report
-- Tanggal scan
-- Target
-- Jenis target
-- Ringkasan hasil
-- Detail hasil per modul
-- Risk notes
-- Sumber data
-- Disclaimer legal/etis
-
-Aman tanpa API key karena semua proses generate report bisa berjalan lokal.
-
-## 4. Fitur Tanpa API Key vs Butuh API Key
-
-### Aman Dibuat Tanpa API Key
-
-| Fitur | Keterangan |
-| --- | --- |
-| DNS Lookup | Menggunakan resolver DNS |
-| WHOIS Lookup | Bisa langsung query WHOIS server |
-| Email format validation | Parser lokal |
-| Email MX lookup | DNS query |
-| Basic domain recon | DNS, WHOIS, HTTP metadata |
-| Basic IP validation | Parsing lokal |
-| Reverse DNS | DNS PTR lookup |
-| Basic subdomain via crt.sh | Bisa tanpa key, tergantung availability |
-| Report PDF | Generate lokal |
-| History scan | Database lokal |
-| Dashboard | Lokal |
-
-### Sebaiknya Pakai API Key
-
-| Fitur | Provider Contoh |
-| --- | --- |
-| IP reputation | AbuseIPDB, VirusTotal, GreyNoise |
-| Domain reputation | VirusTotal, URLScan, SecurityTrails |
-| Subdomain enrichment | SecurityTrails, Shodan, Censys |
-| Username checker stabil | API resmi masing-masing platform |
-| Disposable email database | AbstractAPI, Kickbox, Hunter |
-| Threat intelligence enrichment | VirusTotal, AlienVault OTX |
-
-Rekomendasi portfolio:
-
-- Fitur dasar jalan tanpa API key.
-- API key bersifat opsional.
-- Jika API key tidak tersedia, tampilkan status `Skipped: API key not configured`.
-- Simpan konfigurasi di `.env`.
-
-## 5. Struktur Folder Project
-
-Rekomendasi struktur jika memakai **FastAPI + React + SQLite**:
+### Backend
 
 ```text
-osint-toolkit-local/
+ASP.NET Core Web API (.NET 9)
+```
+
+Alasan:
+
+- Cocok untuk API terstruktur.
+- Strong typing bagus untuk portfolio software engineering.
+- Mudah menerapkan layered architecture.
+- Cocok dengan EF Core, PostgreSQL, Swagger/OpenAPI, dan xUnit.
+
+### Database
+
+```text
+PostgreSQL
+```
+
+Alasan:
+
+- Lebih production-like dibanding SQLite.
+- Bagus untuk portfolio karena menunjukkan skill relational database.
+- Mendukung JSONB untuk menyimpan raw result OSINT secara fleksibel.
+
+### ORM
+
+```text
+Entity Framework Core
+```
+
+Alasan:
+
+- Migration terkelola.
+- Query typed dan maintainable.
+- Cocok dengan repository/service pattern sederhana.
+
+### Testing
+
+```text
+xUnit
+```
+
+Alasan:
+
+- Standard testing framework di ekosistem .NET.
+- Cocok untuk unit test domain logic, service, validator, dan API integration test.
+
+### Optional Worker
+
+```text
+Python worker
+```
+
+Python worker hanya dipakai nanti jika ada library OSINT yang jauh lebih matang di Python. Untuk Sprint 0 sampai MVP awal, backend utama tetap `.NET`.
+
+## 4. MVP Scope yang Direvisi
+
+MVP tidak perlu langsung menjalankan semua modul OSINT. MVP yang realistis adalah membangun alur scan end-to-end terlebih dahulu.
+
+### MVP Target
+
+User bisa:
+
+1. Membuka dashboard lokal.
+2. Membuat scan baru dengan target dan tipe target.
+3. Melihat daftar scan.
+4. Melihat detail scan.
+5. Melihat placeholder result per modul.
+6. Generate report PDF dari data scan.
+
+### MVP Feature Set
+
+Fitur awal:
+
+- Local dashboard
+- Create scan
+- Scan history
+- Scan detail
+- PostgreSQL persistence
+- Basic validation target type
+- Placeholder scan result
+- Report metadata
+- PDF generation sederhana pada fase MVP berikutnya
+
+Fitur OSINT nyata ditunda sampai foundation stabil:
+
+- DNS lookup
+- WHOIS lookup
+- Subdomain finder
+- Email validation
+- Username checker
+- IP reputation lookup
+
+## 5. Prioritas Fitur OSINT
+
+Fitur tetap dipertahankan sebagai arah produk, tetapi implementasinya bertahap.
+
+| Priority | Feature | Mode Aman | API Key |
+| --- | --- | --- | --- |
+| P1 | DNS Lookup | Query DNS record publik | Tidak wajib |
+| P1 | Email Validation | Format + domain + MX check | Tidak wajib |
+| P1 | Report PDF | Generate lokal dari database | Tidak wajib |
+| P2 | WHOIS Lookup | Query WHOIS publik | Tidak wajib, tetapi bisa rate limited |
+| P2 | IP Basic Lookup | Validasi IP + reverse DNS | Tidak wajib |
+| P3 | Passive Subdomain Finder | Certificate Transparency/public source | Opsional |
+| P3 | Username Checker | Public profile check dengan rate limit | Sebaiknya API resmi |
+| P4 | IP Reputation | Threat intel provider | Ya |
+
+## 6. Struktur Folder Final
+
+```text
+OSINT-Toolkit/
 ├── backend/
-│   ├── app/
-│   │   ├── main.py
-│   │   ├── config.py
-│   │   ├── database.py
-│   │   ├── models/
-│   │   │   ├── scan.py
-│   │   │   ├── result.py
-│   │   │   └── api_key.py
-│   │   ├── schemas/
-│   │   │   ├── scan_schema.py
-│   │   │   └── result_schema.py
-│   │   ├── routes/
-│   │   │   ├── scans.py
-│   │   │   ├── domain.py
-│   │   │   ├── email.py
-│   │   │   ├── username.py
-│   │   │   ├── ip.py
-│   │   │   └── reports.py
-│   │   ├── services/
-│   │   │   ├── dns_service.py
-│   │   │   ├── whois_service.py
-│   │   │   ├── subdomain_service.py
-│   │   │   ├── email_service.py
-│   │   │   ├── username_service.py
-│   │   │   ├── ip_service.py
-│   │   │   └── report_service.py
-│   │   ├── workers/
-│   │   │   └── scan_worker.py
-│   │   └── utils/
-│   │       ├── validators.py
-│   │       ├── rate_limit.py
-│   │       └── normalizer.py
-│   ├── tests/
-│   ├── requirements.txt
-│   └── .env.example
+│   ├── OsintToolkit.sln
+│   ├── src/
+│   │   ├── OsintToolkit.Api/
+│   │   │   ├── Controllers/
+│   │   │   ├── Contracts/
+│   │   │   │   ├── Requests/
+│   │   │   │   └── Responses/
+│   │   │   ├── Middleware/
+│   │   │   ├── Program.cs
+│   │   │   ├── appsettings.json
+│   │   │   └── appsettings.Development.json
+│   │   │
+│   │   ├── OsintToolkit.Core/
+│   │   │   ├── Entities/
+│   │   │   ├── Enums/
+│   │   │   ├── Interfaces/
+│   │   │   ├── Services/
+│   │   │   ├── ValueObjects/
+│   │   │   └── Exceptions/
+│   │   │
+│   │   └── OsintToolkit.Infrastructure/
+│   │       ├── Data/
+│   │       │   ├── AppDbContext.cs
+│   │       │   ├── Configurations/
+│   │       │   └── Migrations/
+│   │       ├── Repositories/
+│   │       ├── ReportGeneration/
+│   │       ├── Osint/
+│   │       │   ├── Dns/
+│   │       │   ├── Whois/
+│   │       │   ├── Email/
+│   │       │   ├── Username/
+│   │       │   └── Ip/
+│   │       └── DependencyInjection.cs
+│   │
+│   └── tests/
+│       ├── OsintToolkit.Api.Tests/
+│       ├── OsintToolkit.Core.Tests/
+│       └── OsintToolkit.Infrastructure.Tests/
 │
 ├── frontend/
 │   ├── src/
 │   │   ├── api/
 │   │   ├── components/
+│   │   ├── features/
+│   │   │   ├── scans/
+│   │   │   ├── reports/
+│   │   │   └── settings/
 │   │   ├── pages/
-│   │   │   ├── Dashboard.jsx
-│   │   │   ├── NewScan.jsx
-│   │   │   ├── ScanDetail.jsx
-│   │   │   └── Settings.jsx
+│   │   ├── routes/
 │   │   ├── styles/
-│   │   └── main.jsx
+│   │   ├── types/
+│   │   ├── App.tsx
+│   │   └── main.tsx
 │   ├── package.json
-│   └── vite.config.js
-│
-├── reports/
-│   └── generated/
-│
-├── data/
-│   └── osint_toolkit.db
+│   ├── tsconfig.json
+│   └── vite.config.ts
 │
 ├── docs/
 │   ├── project-plan.md
 │   ├── architecture.md
 │   ├── ethical-guidelines.md
-│   └── api-reference.md
+│   ├── api-reference.md
+│   └── sprint-checklists.md
 │
-├── README.md
+├── reports/
+│   └── generated/
+│
+├── docker/
+│   └── postgres/
+│
+├── .env.example
 ├── .gitignore
-└── docker-compose.yml
+├── docker-compose.yml
+└── README.md
 ```
 
-## 6. Desain Arsitektur Sederhana
+## 7. Backend Architecture
 
-Komponen utama:
+Backend memakai arsitektur sederhana berbasis layer:
 
 ```text
-User
-  |
-  v
-Frontend Dashboard
-  |
-  v
-Backend API
-  |
-  +--> Validation Layer
-  |
-  +--> OSINT Services
-  |      ├── DNS Service
-  |      ├── WHOIS Service
-  |      ├── Email Service
-  |      ├── Username Service
-  |      ├── IP Service
-  |      └── Report Service
-  |
-  +--> SQLite Database
-  |
-  +--> PDF Generator
+OsintToolkit.Api
+  -> OsintToolkit.Core
+  -> OsintToolkit.Infrastructure
 ```
 
-Flow teknis:
+### 7.1 API Layer
 
-1. User memasukkan target di frontend.
-2. Frontend mengirim request ke backend.
-3. Backend validasi target.
-4. Backend menentukan modul lookup yang relevan.
-5. Service menjalankan lookup pasif.
-6. Hasil disimpan ke database.
-7. Frontend menampilkan hasil scan.
-8. User bisa export PDF.
-9. Backend generate PDF dari data scan.
-
-Mode eksekusi MVP:
+Project:
 
 ```text
-POST /api/scans
--> backend proses lookup
--> simpan hasil
--> return scan_id
+OsintToolkit.Api
 ```
 
-Mode lanjut dengan worker async:
+Tanggung jawab:
+
+- HTTP endpoints
+- Request/response DTO
+- Input validation ringan
+- Swagger/OpenAPI
+- Error handling middleware
+- Dependency injection bootstrapping
+- CORS untuk frontend lokal
+
+Tidak boleh berisi:
+
+- Query EF Core langsung dari controller
+- Logic OSINT detail
+- Business rule utama
+
+### 7.2 Core Layer
+
+Project:
 
 ```text
-POST /api/scans
--> create scan status: pending
--> worker proses lookup
--> update status: completed
+OsintToolkit.Core
 ```
 
-## 7. Skema Database Awal
+Tanggung jawab:
 
-Database awal: SQLite.
+- Entity domain
+- Enum domain
+- Interface service/repository
+- Business rule dasar
+- Target classification
+- Scan orchestration contract
+- Validation rule yang tidak bergantung framework
 
-### Tabel `scans`
+Tidak boleh berisi:
 
-Menyimpan metadata scan.
+- EF Core dependency
+- PostgreSQL-specific code
+- HTTP-specific code
+- File system implementation detail
+
+### 7.3 Infrastructure Layer
+
+Project:
+
+```text
+OsintToolkit.Infrastructure
+```
+
+Tanggung jawab:
+
+- EF Core `DbContext`
+- PostgreSQL provider configuration
+- Repository implementation
+- Migration
+- Report generator implementation
+- OSINT provider implementation
+- External HTTP client implementation
+- Optional API key provider
+
+### 7.4 Tests
+
+Projects:
+
+```text
+OsintToolkit.Core.Tests
+OsintToolkit.Infrastructure.Tests
+OsintToolkit.Api.Tests
+```
+
+Fokus test:
+
+- Core unit tests untuk target validation dan scan flow.
+- Infrastructure tests untuk repository dan EF mapping.
+- API tests untuk endpoint MVP.
+
+## 8. Database Schema Awal
+
+Database: PostgreSQL.
+
+Gunakan EF Core migration, bukan SQL manual sebagai sumber utama. SQL di bawah ini adalah desain konseptual.
+
+### `scans`
 
 ```sql
 CREATE TABLE scans (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    id UUID PRIMARY KEY,
     target TEXT NOT NULL,
     target_type TEXT NOT NULL,
     status TEXT NOT NULL,
     risk_score INTEGER,
-    created_at TEXT NOT NULL,
-    completed_at TEXT,
+    created_at TIMESTAMPTZ NOT NULL,
+    started_at TIMESTAMPTZ,
+    completed_at TIMESTAMPTZ,
     notes TEXT
 );
 ```
 
-Contoh `target_type`:
-
-- `domain`
-- `email`
-- `username`
-- `ip`
-
-Contoh `status`:
-
-- `pending`
-- `running`
-- `completed`
-- `failed`
-
-### Tabel `scan_results`
-
-Menyimpan hasil setiap modul.
+### `scan_results`
 
 ```sql
 CREATE TABLE scan_results (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    scan_id INTEGER NOT NULL,
+    id UUID PRIMARY KEY,
+    scan_id UUID NOT NULL REFERENCES scans(id) ON DELETE CASCADE,
     module_name TEXT NOT NULL,
     status TEXT NOT NULL,
     summary TEXT,
-    raw_data_json TEXT,
-    created_at TEXT NOT NULL,
-    FOREIGN KEY (scan_id) REFERENCES scans(id)
+    raw_data JSONB,
+    created_at TIMESTAMPTZ NOT NULL
 );
 ```
 
-Contoh `module_name`:
-
-- `dns_lookup`
-- `whois_lookup`
-- `subdomain_finder`
-- `email_validation`
-- `username_checker`
-- `ip_reputation`
-
-### Tabel `reports`
-
-Menyimpan metadata file report.
+### `reports`
 
 ```sql
 CREATE TABLE reports (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    scan_id INTEGER NOT NULL,
+    id UUID PRIMARY KEY,
+    scan_id UUID NOT NULL REFERENCES scans(id) ON DELETE CASCADE,
+    file_name TEXT NOT NULL,
     file_path TEXT NOT NULL,
-    generated_at TEXT NOT NULL,
-    FOREIGN KEY (scan_id) REFERENCES scans(id)
+    generated_at TIMESTAMPTZ NOT NULL
 );
 ```
 
-### Tabel `api_keys`
+### Enum Konseptual
 
-Opsional untuk menyimpan konfigurasi API key secara lokal.
+`TargetType`:
 
-```sql
-CREATE TABLE api_keys (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    provider_name TEXT NOT NULL,
-    key_name TEXT NOT NULL,
-    encrypted_value TEXT NOT NULL,
-    is_enabled INTEGER NOT NULL DEFAULT 1,
-    created_at TEXT NOT NULL,
-    updated_at TEXT NOT NULL
-);
+- `Domain`
+- `Email`
+- `Username`
+- `IpAddress`
+
+`ScanStatus`:
+
+- `Pending`
+- `Running`
+- `Completed`
+- `Failed`
+- `Cancelled`
+
+`ModuleStatus`:
+
+- `Pending`
+- `Skipped`
+- `Completed`
+- `Failed`
+
+## 9. Endpoint MVP Sederhana
+
+Untuk MVP, jangan membuat endpoint terpisah seperti `/api/domain/dns`, `/api/domain/whois`, dan sejenisnya. Semua proses dimulai dari scan.
+
+### Health
+
+```http
+GET /api/health
 ```
 
-Untuk MVP, lebih sederhana memakai `.env` dulu daripada tabel `api_keys`.
+Tujuan:
 
-Relasi utama:
+- Memastikan backend hidup.
+- Dipakai frontend untuk status check.
 
-```text
-scans 1 --- many scan_results
-scans 1 --- many reports
-```
-
-## 8. Endpoint API yang Dibutuhkan
-
-### Scan
-
-Create scan:
+### Create Scan
 
 ```http
 POST /api/scans
@@ -536,377 +445,420 @@ Request:
 ```json
 {
   "target": "example.com",
-  "target_type": "domain"
+  "targetType": "Domain",
+  "modules": ["DnsLookup", "WhoisLookup"]
 }
 ```
 
-Response:
+Catatan MVP:
 
-```json
-{
-  "scan_id": 1,
-  "status": "completed"
-}
-```
+- Pada Sprint 1, `modules` boleh disimpan sebagai rencana scan.
+- Implementasi OSINT real belum wajib.
+- Jika modul belum tersedia, hasil bisa dibuat sebagai `Skipped` atau placeholder.
 
-Get all scans:
+### List Scans
 
 ```http
 GET /api/scans
 ```
 
-Get scan detail:
+Query opsional:
 
 ```http
-GET /api/scans/{scan_id}
+GET /api/scans?targetType=Domain&status=Completed
 ```
 
-Delete scan:
+### Get Scan Detail
 
 ```http
-DELETE /api/scans/{scan_id}
+GET /api/scans/{scanId}
 ```
 
-### Domain
+### Delete Scan
 
 ```http
-POST /api/domain/recon
-POST /api/domain/dns
-POST /api/domain/whois
-POST /api/domain/subdomains
+DELETE /api/scans/{scanId}
 ```
 
-### Email
+### Generate Report
 
 ```http
-POST /api/email/validate
+POST /api/scans/{scanId}/report
 ```
 
-### Username
+### Download Report
 
 ```http
-POST /api/username/check
+GET /api/reports/{reportId}/download
 ```
 
-### IP
+Endpoint tambahan baru dibuat ketika ada kebutuhan nyata. Prinsip MVP: scan-centric API dulu.
 
-```http
-POST /api/ip/lookup
-POST /api/ip/reputation
-```
-
-### Report
-
-Generate PDF:
-
-```http
-POST /api/reports/{scan_id}/generate
-```
-
-Download PDF:
-
-```http
-GET /api/reports/{report_id}/download
-```
-
-## 9. Alur User dari Input sampai Report
-
-Alur utama:
-
-1. User membuka dashboard lokal.
-2. User klik `New Scan`.
-3. User memilih tipe target: domain, email, username, atau IP.
-4. User memasukkan target.
-5. User memilih modul yang ingin dijalankan.
-6. User klik `Start Scan`.
-7. Backend melakukan validasi input.
-8. Backend menjalankan lookup sesuai modul.
-9. Hasil disimpan ke database.
-10. Dashboard menampilkan ringkasan hasil.
-11. User membuka detail hasil scan.
-12. User klik `Generate PDF`.
-13. Backend membuat report PDF.
-14. User mengunduh report.
-
-Contoh alur domain:
+## 10. User Flow MVP
 
 ```text
-Input:
-example.com
-
-Modules:
-- DNS Lookup
-- WHOIS Lookup
-- Subdomain Finder
-
-Output:
-- DNS records
-- Registrar info
-- Name servers
-- Found subdomains
-- Report PDF
+User
+  -> buka React dashboard di localhost
+  -> klik New Scan
+  -> pilih target type
+  -> isi target
+  -> pilih modul yang direncanakan
+  -> submit
+  -> frontend call POST /api/scans
+  -> backend validasi input
+  -> backend simpan scan ke PostgreSQL
+  -> backend simpan placeholder module result jika modul belum tersedia
+  -> frontend redirect ke scan detail
+  -> user melihat hasil
+  -> user generate report
+  -> user download PDF
 ```
 
-## 10. Roadmap Pengerjaan
+## 11. Sprint 0 Checklist - Project Foundation
 
-### Version 0.1 - Project Foundation
+Sprint 0 fokus ke fondasi teknis. Tidak ada implementasi OSINT real.
 
-Target:
+### Repository & Documentation
 
-- Setup repository
-- Setup backend
-- Setup frontend
-- Setup SQLite
-- Basic dashboard layout
+- [ ] Buat `README.md` awal.
+- [ ] Finalisasi `docs/project-plan.md`.
+- [ ] Buat `docs/ethical-guidelines.md`.
+- [ ] Buat `.gitignore`.
+- [ ] Buat `.env.example`.
+- [ ] Tentukan cara menjalankan backend, frontend, dan database lokal.
 
-Fitur:
+### Backend Foundation
 
-- Health check API
-- Database connection
-- Basic scan model
-- Frontend halaman dashboard kosong
+- [ ] Buat .NET solution `OsintToolkit.sln`.
+- [ ] Buat project `OsintToolkit.Api`.
+- [ ] Buat project `OsintToolkit.Core`.
+- [ ] Buat project `OsintToolkit.Infrastructure`.
+- [ ] Hubungkan project references sesuai layering.
+- [ ] Setup Swagger/OpenAPI.
+- [ ] Setup CORS untuk frontend lokal.
+- [ ] Buat endpoint `GET /api/health`.
+- [ ] Buat global error handling middleware minimal.
+
+### Database Foundation
+
+- [ ] Setup PostgreSQL lokal via Docker Compose.
+- [ ] Tambahkan connection string development.
+- [ ] Setup EF Core di Infrastructure.
+- [ ] Buat `AppDbContext`.
+- [ ] Buat entity awal: `Scan`, `ScanResult`, `Report`.
+- [ ] Buat EF Core migration pertama.
+- [ ] Verifikasi migration bisa apply ke PostgreSQL lokal.
+
+### Testing Foundation
+
+- [ ] Buat `OsintToolkit.Core.Tests`.
+- [ ] Buat `OsintToolkit.Infrastructure.Tests`.
+- [ ] Buat `OsintToolkit.Api.Tests`.
+- [ ] Tambahkan xUnit.
+- [ ] Tambahkan test sederhana untuk health endpoint atau core validation.
+- [ ] Pastikan `dotnet test` berjalan.
+
+### Frontend Foundation
+
+- [ ] Buat React app dengan Vite + TypeScript.
+- [ ] Setup struktur folder frontend.
+- [ ] Buat layout dasar dashboard.
+- [ ] Buat halaman `Dashboard`.
+- [ ] Buat halaman `NewScan` placeholder.
+- [ ] Buat API client dasar.
+- [ ] Call `GET /api/health` dari frontend.
+
+### Definition of Done Sprint 0
+
+- [ ] Backend berjalan lokal.
+- [ ] Frontend berjalan lokal.
+- [ ] PostgreSQL berjalan lokal.
+- [ ] EF Core migration berhasil.
+- [ ] Health check API bisa dipanggil.
+- [ ] Frontend bisa membaca status backend.
+- [ ] `dotnet test` berhasil.
+- [ ] Tidak ada fitur OSINT real yang diimplementasikan.
+
+## 12. Sprint 1 Checklist - Scan Management MVP
+
+Sprint 1 fokus ke CRUD scan dan data model, bukan lookup OSINT real.
+
+### Backend
+
+- [ ] Buat DTO request/response scan.
+- [ ] Buat enum `TargetType`.
+- [ ] Buat enum `ScanStatus`.
+- [ ] Buat enum `ModuleStatus`.
+- [ ] Buat service `ScanService`.
+- [ ] Buat repository interface di Core.
+- [ ] Buat repository implementation di Infrastructure.
+- [ ] Implement `POST /api/scans`.
+- [ ] Implement `GET /api/scans`.
+- [ ] Implement `GET /api/scans/{scanId}`.
+- [ ] Implement `DELETE /api/scans/{scanId}`.
+- [ ] Simpan selected modules sebagai placeholder result.
+- [ ] Tambahkan validasi target minimal berdasarkan `targetType`.
+
+### Database
+
+- [ ] Pastikan relasi `Scan` ke `ScanResult`.
+- [ ] Pastikan delete scan menghapus scan results.
+- [ ] Gunakan `JSONB` untuk `raw_data` di `ScanResult`.
+
+### Frontend
+
+- [ ] Buat form `New Scan`.
+- [ ] Buat pilihan target type.
+- [ ] Buat checklist modules.
+- [ ] Buat halaman scan list.
+- [ ] Buat halaman scan detail.
+- [ ] Tambahkan loading state.
+- [ ] Tambahkan error state.
+
+### Tests
+
+- [ ] Unit test target validation.
+- [ ] Unit test create scan service.
+- [ ] API test create scan.
+- [ ] API test get scan detail.
+- [ ] Repository test basic persistence.
+
+### Definition of Done Sprint 1
+
+- [ ] User bisa membuat scan.
+- [ ] User bisa melihat daftar scan.
+- [ ] User bisa membuka detail scan.
+- [ ] Data tersimpan di PostgreSQL.
+- [ ] Tidak ada lookup OSINT real dulu.
+- [ ] Test utama berjalan.
+
+## 13. GitHub Issues yang Harus Dibuat
+
+### Sprint 0 Issues
+
+1. `docs: finalize project plan for .NET and React stack`
+2. `docs: add ethical guidelines for legal OSINT scope`
+3. `chore: initialize .NET solution structure`
+4. `chore: create API, Core, Infrastructure, and test projects`
+5. `chore: configure PostgreSQL with Docker Compose`
+6. `feat: add backend health check endpoint`
+7. `chore: configure Swagger and CORS`
+8. `chore: setup EF Core DbContext and initial entities`
+9. `chore: create initial EF Core migration`
+10. `test: setup xUnit test projects`
+11. `chore: initialize React Vite TypeScript frontend`
+12. `feat: add frontend dashboard shell`
+13. `feat: connect frontend to backend health endpoint`
+14. `docs: add local development setup instructions`
+
+### Sprint 1 Issues
+
+15. `feat: add scan domain entities and enums`
+16. `feat: add scan request and response DTOs`
+17. `feat: implement scan repository`
+18. `feat: implement scan service`
+19. `feat: implement create scan endpoint`
+20. `feat: implement list scans endpoint`
+21. `feat: implement scan detail endpoint`
+22. `feat: implement delete scan endpoint`
+23. `feat: add target validation rules`
+24. `feat: add new scan form in frontend`
+25. `feat: add scan history page`
+26. `feat: add scan detail page`
+27. `test: add scan service unit tests`
+28. `test: add scan API tests`
+29. `test: add repository persistence tests`
+
+### Future Issues
+
+30. `feat: implement DNS lookup module`
+31. `feat: implement email validation module`
+32. `feat: implement WHOIS lookup module`
+33. `feat: implement basic IP lookup module`
+34. `feat: implement PDF report generation`
+35. `feat: implement passive subdomain discovery`
+36. `feat: implement username checker with rate limiting`
+37. `feat: add optional API key settings`
+38. `feat: add IP reputation provider integration`
+39. `docs: add screenshots and portfolio demo guide`
+
+## 14. Milestones 0.1 sampai 1.0
+
+### v0.1 - Project Foundation
+
+Fokus:
+
+- Solution structure
+- Frontend scaffold
+- PostgreSQL local setup
+- Health check
+- Test foundation
 
 Deliverable:
 
-- App bisa jalan lokal
-- Backend dan frontend tersambung
+- Backend, frontend, dan database berjalan lokal.
 
-### Version 0.2 - Scan Management
+### v0.2 - Scan Management
 
-Target:
-
-- CRUD scan sederhana
-
-Fitur:
+Fokus:
 
 - Create scan
 - List scan
-- Detail scan
+- Scan detail
 - Delete scan
-- Simpan target dan status
+- Placeholder module results
 
 Deliverable:
 
-- User bisa membuat dan melihat history scan
+- User bisa membuat dan melihat riwayat scan tanpa lookup OSINT real.
 
-### Version 0.3 - Domain DNS Lookup
+### v0.3 - DNS Lookup
 
-Target:
+Fokus:
 
-- Modul domain pertama
-
-Fitur:
-
-- DNS A record
-- MX record
-- NS record
-- TXT record
-- Simpan hasil JSON
-- Tampilkan di UI
+- DNS record lookup untuk domain.
+- Record awal: A, AAAA, MX, NS, TXT.
 
 Deliverable:
 
-- Domain scan menampilkan DNS records
+- Domain scan bisa menghasilkan DNS result publik.
 
-### Version 0.4 - WHOIS Lookup
+### v0.4 - Email Validation
 
-Target:
+Fokus:
 
-- Tambahkan WHOIS
-
-Fitur:
-
-- Registrar
-- Created date
-- Expiry date
-- Name servers
-- Domain status
+- Email format validation.
+- Domain extraction.
+- MX lookup.
 
 Deliverable:
 
-- Domain recon mulai terasa lengkap
+- Email target bisa dianalisis secara pasif.
 
-### Version 0.5 - Email Validation
+### v0.5 - WHOIS Lookup
 
-Target:
+Fokus:
 
-- Modul email dasar
-
-Fitur:
-
-- Format validation
-- Domain extraction
-- MX lookup
-- Disposable check placeholder
+- WHOIS publik.
+- Registrar, created date, expiry date, name server.
 
 Deliverable:
 
-- Email bisa dianalisis secara pasif
+- Domain scan punya enrichment WHOIS.
 
-### Version 0.6 - IP Lookup
+### v0.6 - Basic IP Lookup
 
-Target:
+Fokus:
 
-- Modul IP dasar
-
-Fitur:
-
-- IP validation
-- Reverse DNS
-- Basic geolocation optional
-- ASN placeholder
+- IP validation.
+- Reverse DNS.
+- Basic ASN/geolocation jika sumber aman tersedia.
 
 Deliverable:
 
-- IP bisa dicek dengan hasil dasar
+- IP target bisa dianalisis dengan data publik dasar.
 
-### Version 0.7 - Report PDF
+### v0.7 - PDF Report
 
-Target:
+Fokus:
 
-- Export hasil scan
-
-Fitur:
-
-- Generate PDF
-- Download PDF
-- Report template
-- Ethical disclaimer
+- Generate report dari scan detail.
+- Download PDF.
+- Tambahkan disclaimer legal/etis.
 
 Deliverable:
 
-- Project mulai kuat untuk portfolio
+- Report bisa dipakai sebagai portfolio artifact.
 
-### Version 0.8 - Subdomain Finder
+### v0.8 - Passive Subdomain Discovery
 
-Target:
+Fokus:
 
-- Passive subdomain discovery
-
-Fitur:
-
-- Integrasi `crt.sh` atau sumber publik sejenis
-- Deduplicate subdomain
-- DNS resolve ringan
-- Simpan source
+- Certificate Transparency atau sumber publik pasif.
+- Deduplication.
+- Rate limiting.
 
 Deliverable:
 
-- Domain recon lebih menarik
+- Domain recon lebih lengkap tanpa brute force.
 
-### Version 0.9 - Username Checker
+### v0.9 - Username Checker
 
-Target:
+Fokus:
 
-- Cek username di beberapa platform publik
-
-Fitur:
-
-- GitHub
-- GitLab
-- Reddit
-- Medium
-- Rate limiting
-- Timeout handling
+- Public profile checker terbatas.
+- Rate limiting.
+- Status `Found`, `NotFound`, `Unknown`.
 
 Deliverable:
 
-- Username investigation tersedia
+- Username target bisa dicek di platform publik yang aman.
 
-### Version 1.0 - Portfolio Polish
+### v1.0 - Portfolio Polish
 
-Target:
+Fokus:
 
-- Project siap dipresentasikan
-
-Fitur:
-
-- UI rapi
-- Error handling
-- Loading states
-- Settings API key optional
-- README lengkap
-- Screenshot
-- Demo data
-- Unit test dasar
-- Docker Compose optional
+- UI polish.
+- Error handling.
+- Empty/loading states.
+- Test coverage dasar.
+- README lengkap.
+- Screenshot.
+- Demo data.
 
 Deliverable:
 
-- Portfolio-ready project
+- Project siap ditampilkan sebagai portfolio cybersecurity + software engineering.
 
-## 11. Risiko Etis/Legal dan Batasan Fitur
+## 15. Ethical and Legal Guardrails
 
-Prinsip utama:
+Project harus selalu berada dalam batas berikut:
 
-> Project hanya boleh mengambil data publik dan tidak boleh digunakan untuk akses tidak sah.
-
-Batasan wajib:
-
-- Tidak brute force login.
-- Tidak password spraying.
-- Tidak credential stuffing.
+- Hanya data publik.
+- Tidak login ke akun orang lain.
 - Tidak bypass authentication.
+- Tidak brute force.
+- Tidak password reset probing.
 - Tidak exploit vulnerability.
-- Tidak port scanning agresif.
+- Tidak port scanning otomatis.
 - Tidak directory brute forcing.
-- Tidak mengakses data private.
-- Tidak mengambil data dari balik login.
-- Tidak scraping masif tanpa izin.
-- Tidak mengabaikan robots.txt atau Terms of Service.
-- Tidak menyimpan data sensitif tanpa alasan jelas.
+- Tidak scraping masif.
+- Tidak mengabaikan Terms of Service.
+- Tidak menyimpan data sensitif tanpa kebutuhan jelas.
 
-### Username Checker
+### Guardrail per Fitur
 
-Risiko:
+DNS lookup:
 
-- Bisa dianggap scraping jika terlalu agresif.
+- Aman selama hanya query DNS record publik.
 
-Batasan:
+WHOIS lookup:
 
-- Gunakan rate limit.
+- Aman selama membaca data WHOIS publik dan menghormati rate limit.
+
+Subdomain finder:
+
+- Gunakan passive source.
+- Jangan gunakan wordlist brute force pada MVP.
+
+Username checker:
+
 - Platform terbatas.
-- Pakai API resmi jika memungkinkan.
-- Simpan hanya URL publik dan status ditemukan.
+- Rate limit wajib.
+- Prefer API resmi.
+- Jangan cek flow reset password.
 
-### Subdomain Finder
+IP reputation:
 
-Risiko:
-
-- Bruteforce subdomain bisa terlihat seperti recon aktif.
-
-Batasan:
-
-- MVP pakai passive source.
-- Jangan gunakan wordlist besar.
-- Jangan melakukan port scan otomatis.
-
-### IP Reputation
-
-Risiko:
-
-- Data reputasi bisa salah atau out of date.
-
-Batasan:
-
-- Tampilkan source.
-- Jangan membuat tuduhan final.
-- Gunakan label seperti `Potential Risk`, bukan `Confirmed Malicious`.
-
-### Report PDF
-
-Risiko:
-
-- Report bisa disalahartikan sebagai bukti final.
-
-Batasan:
-
-- Tambahkan disclaimer.
-- Tampilkan tanggal scan.
 - Tampilkan sumber data.
-- Jelaskan bahwa hasil perlu verifikasi manual.
+- Hindari klaim final seperti `confirmed malicious`.
+- Gunakan istilah `potential risk` atau `reported by source`.
 
-Disclaimer yang disarankan:
+Report:
+
+- Wajib menyertakan tanggal scan, source, dan disclaimer.
+
+Disclaimer report:
 
 ```text
 This report is generated from publicly available information only.
@@ -915,84 +867,30 @@ No authentication bypass, exploitation, brute force, or unauthorized access was 
 Findings should be manually verified before being used for security decisions.
 ```
 
-## 12. Saran Tech Stack Final
+## 16. Final Recommendation
 
-Rekomendasi utama:
-
-```text
-Backend: Python FastAPI
-Frontend: React + Vite
-Database: SQLite
-PDF: WeasyPrint atau ReportLab
-Worker: FastAPI BackgroundTasks dulu, Celery/RQ nanti
-Styling: Tailwind CSS atau CSS biasa
-```
-
-### Alasan
-
-FastAPI cocok karena:
-
-- Mudah dibuat.
-- Dokumentasi API otomatis lewat Swagger.
-- Cocok untuk service-style backend.
-- Banyak library OSINT, DNS, dan WHOIS di Python.
-- Portfolio-friendly.
-
-React + Vite cocok karena:
-
-- Modern.
-- Cepat untuk dashboard.
-- Banyak opsi komponen UI.
-- Mudah dipresentasikan sebagai portfolio software engineering.
-
-SQLite cocok karena:
-
-- Tidak perlu setup server database.
-- Ideal untuk app lokal.
-- Mudah dipindahkan ke PostgreSQL nanti.
-
-Python worker optional cocok karena:
-
-- Lookup OSINT sering lebih mudah di Python.
-- Bisa dipisah dari API kalau project membesar.
-
-## Final Recommendation
-
-Gunakan stack ini untuk versi awal:
+Stack final:
 
 ```text
-FastAPI + React + SQLite
+Frontend: React + Vite + TypeScript
+Backend: ASP.NET Core Web API (.NET 9)
+Database: PostgreSQL
+ORM: Entity Framework Core
+Testing: xUnit
+Optional Worker: Python only when needed
 ```
 
-Pendekatan:
+Urutan kerja yang direkomendasikan:
 
-- Mulai dari fitur tanpa API key.
-- Simpan hasil scan dalam JSON.
-- Buat report PDF dari hasil database.
-- API key dibuat optional setelah MVP stabil.
+1. Selesaikan Sprint 0 foundation.
+2. Lanjut Sprint 1 scan management.
+3. Baru implementasi modul OSINT satu per satu.
+4. Pastikan setiap modul punya batasan etis, rate limit, error handling, dan test.
 
-Urutan pengerjaan terbaik:
+Prinsip arsitektur:
 
-```text
-0.1 Foundation
-0.2 Scan CRUD
-0.3 DNS Lookup
-0.4 WHOIS Lookup
-0.5 Email Validation
-0.6 IP Lookup
-0.7 PDF Report
-0.8 Subdomain Finder
-0.9 Username Checker
-1.0 Polish
-```
-
-Project ini cukup kuat untuk portfolio karena menunjukkan:
-
-- Backend API design
-- Frontend dashboard
-- Database modeling
-- Integrasi external/public data
-- Report generation
-- Security ethics awareness
-- Error handling dan rate limiting
-- Dokumentasi teknis yang jelas
+- API tetap tipis.
+- Business rule ada di Core.
+- EF Core dan provider OSINT ada di Infrastructure.
+- Endpoint tetap scan-centric sampai kebutuhan memaksa pemisahan.
+- Python worker tidak dipakai sebelum ada alasan teknis yang jelas.
