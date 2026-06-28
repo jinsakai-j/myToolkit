@@ -520,64 +520,66 @@ Sprint 0 fokus ke fondasi teknis. Tidak ada implementasi OSINT real.
 
 ### Repository & Documentation
 
-- [ ] Buat `README.md` awal.
-- [ ] Finalisasi `docs/project-plan.md`.
-- [ ] Buat `docs/ethical-guidelines.md`.
-- [ ] Buat `.gitignore`.
-- [ ] Buat `.env.example`.
-- [ ] Tentukan cara menjalankan backend, frontend, dan database lokal.
+- [x] Buat `README.md` awal.
+- [x] Finalisasi `docs/project-plan.md`.
+- [x] Buat `docs/ethical-guidelines.md`.
+- [x] Buat `.gitignore`.
+- [x] Buat `.env.example`.
+- [x] Tentukan cara menjalankan backend, frontend, dan database lokal.
 
 ### Backend Foundation
 
-- [ ] Buat .NET solution `OsintToolkit.sln`.
-- [ ] Buat project `OsintToolkit.Api`.
-- [ ] Buat project `OsintToolkit.Core`.
-- [ ] Buat project `OsintToolkit.Infrastructure`.
-- [ ] Hubungkan project references sesuai layering.
-- [ ] Setup Swagger/OpenAPI.
-- [ ] Setup CORS untuk frontend lokal.
-- [ ] Buat endpoint `GET /api/health`.
-- [ ] Buat global error handling middleware minimal.
+- [x] Buat .NET solution `OsintToolkit.sln`.
+- [x] Buat project `OsintToolkit.Api`.
+- [x] Buat project `OsintToolkit.Core`.
+- [x] Buat project `OsintToolkit.Infrastructure`.
+- [x] Hubungkan project references sesuai layering.
+- [x] Setup Swagger/OpenAPI.
+- [x] Setup CORS untuk frontend lokal.
+- [x] Buat endpoint `GET /api/health`.
+- [x] Buat global error handling middleware minimal.
 
 ### Database Foundation
 
-- [ ] Setup PostgreSQL lokal via Docker Compose.
-- [ ] Tambahkan connection string development.
-- [ ] Setup EF Core di Infrastructure.
-- [ ] Buat `AppDbContext`.
-- [ ] Buat entity awal: `Scan`, `ScanResult`, `Report`.
-- [ ] Buat EF Core migration pertama.
-- [ ] Verifikasi migration bisa apply ke PostgreSQL lokal.
+- [x] Setup PostgreSQL lokal via Docker Compose.
+- [x] Tambahkan connection string development.
+- [x] Setup EF Core di Infrastructure.
+- [x] Buat `AppDbContext`.
+- [x] Buat entity awal: `Scan`, `ScanResult`, `Report`.
+- [x] Buat EF Core migration pertama.
+- [x] Verifikasi migration bisa apply ke PostgreSQL lokal.
 
 ### Testing Foundation
 
-- [ ] Buat `OsintToolkit.Core.Tests`.
-- [ ] Buat `OsintToolkit.Infrastructure.Tests`.
-- [ ] Buat `OsintToolkit.Api.Tests`.
-- [ ] Tambahkan xUnit.
-- [ ] Tambahkan test sederhana untuk health endpoint atau core validation.
-- [ ] Pastikan `dotnet test` berjalan.
+- [x] Buat `OsintToolkit.Core.Tests`.
+- [x] Buat `OsintToolkit.Infrastructure.Tests`.
+- [x] Buat `OsintToolkit.Api.Tests`.
+- [x] Tambahkan xUnit.
+- [x] Tambahkan test sederhana untuk health endpoint atau core validation.
+- [x] Pastikan `dotnet test` berjalan.
 
 ### Frontend Foundation
 
-- [ ] Buat React app dengan Vite + TypeScript.
-- [ ] Setup struktur folder frontend.
-- [ ] Buat layout dasar dashboard.
-- [ ] Buat halaman `Dashboard`.
+- [x] Buat React app dengan Vite + TypeScript.
+- [x] Setup struktur folder frontend.
+- [x] Buat layout dasar dashboard.
+- [x] Buat halaman `Dashboard`.
 - [ ] Buat halaman `NewScan` placeholder.
-- [ ] Buat API client dasar.
-- [ ] Call `GET /api/health` dari frontend.
+- [x] Buat API client dasar.
+- [x] Call `GET /api/health` dari frontend.
 
 ### Definition of Done Sprint 0
 
-- [ ] Backend berjalan lokal.
-- [ ] Frontend berjalan lokal.
-- [ ] PostgreSQL berjalan lokal.
-- [ ] EF Core migration berhasil.
-- [ ] Health check API bisa dipanggil.
-- [ ] Frontend bisa membaca status backend.
-- [ ] `dotnet test` berhasil.
-- [ ] Tidak ada fitur OSINT real yang diimplementasikan.
+- [x] Backend berjalan lokal.
+- [x] Frontend build berhasil.
+- [x] PostgreSQL berjalan lokal.
+- [x] EF Core migration berhasil.
+- [x] Health check API bisa dipanggil.
+- [x] Frontend memiliki integrasi health endpoint.
+- [x] `dotnet test` berhasil.
+- [ ] Swagger UI berhasil diakses setelah restart backend terbaru.
+- [ ] Frontend dev server berjalan dan dashboard menampilkan status backend.
+- [x] Tidak ada fitur OSINT real yang diimplementasikan.
 
 ## 12. Sprint 1 Checklist - Scan Management MVP
 

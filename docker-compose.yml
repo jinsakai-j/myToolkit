@@ -1,0 +1,21 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: osint-toolkit-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: osint_toolkit
+      POSTGRES_USER: osint_toolkit
+      POSTGRES_PASSWORD: osint_toolkit_password
+    ports:
+      - "5433:5432"
+    volumes:
+      - osint_toolkit_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U osint_toolkit -d osint_toolkit"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  osint_toolkit_postgres_data:
