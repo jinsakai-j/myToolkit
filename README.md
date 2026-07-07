@@ -1,8 +1,41 @@
 # OSINT Toolkit Local
 
+![.NET 9](https://img.shields.io/badge/.NET-9-512BD4)
+![React](https://img.shields.io/badge/React-18-61DAFB)
+![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-4169E1)
+![License](https://img.shields.io/badge/License-MIT-green)
+![Project Status](https://img.shields.io/badge/Status-Sprint%200%20Runtime%20Verification-yellow)
+
 Local OSINT dashboard project for a cybersecurity and software engineering portfolio.
 
 The project is currently in **Sprint 0 - Project Foundation**. It only contains the application foundation: backend solution, PostgreSQL setup, EF Core entities/migration, frontend shell, health check, and test projects. Real OSINT modules are intentionally not implemented yet.
+
+## Project Status
+
+Current Version:
+
+```text
+v0.1.0-alpha
+```
+
+Current Sprint:
+
+```text
+Sprint 0
+```
+
+Current Status:
+
+```text
+Runtime Verification
+```
+
+Next Milestone:
+
+```text
+Sprint 1 - Scan Management
+```
 
 ## Tech Stack
 
@@ -34,9 +67,13 @@ This project is limited to legal and ethical OSINT workflows:
 
 ### 1. Start PostgreSQL
 
+Copy `.env.example` to `.env` if you want to override the default local Docker Compose values.
+
 ```bash
 docker compose up -d postgres
 ```
+
+The project PostgreSQL container maps to host port `5433` to avoid collisions with a local PostgreSQL service on `5432`.
 
 ### 2. Restore and migrate backend
 
@@ -74,8 +111,6 @@ Health endpoint:
 GET http://localhost:5080/api/health
 ```
 
-PostgreSQL is exposed on host port `5433` to avoid colliding with a local PostgreSQL service on `5432`.
-
 ### 4. Run frontend
 
 ```bash
@@ -95,6 +130,12 @@ http://localhost:5173
 ```bash
 cd backend
 dotnet test
+```
+
+If the test runner hits local socket restrictions in a sandboxed environment, run:
+
+```bash
+dotnet test -m:1
 ```
 
 ## Sprint 0 Status
@@ -122,6 +163,13 @@ Not implemented yet:
 - IP reputation
 - Report PDF
 - Python worker
+
+## Repository Hygiene
+
+- Do not commit `.env`, `appsettings.Local.json`, build outputs, local SDK folders, `node_modules`, frontend `dist`, coverage reports, logs, or generated PDF reports.
+- Keep `.env.example` committed with placeholder local development values only.
+- Local generated folders do not need to be deleted if they were never tracked by Git and are already covered by `.gitignore`.
+- Update `docs/progress-log.md` after each meaningful task.
 
 ## Project Documentation
 

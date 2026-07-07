@@ -155,3 +155,32 @@ feat: verify sprint 0 foundation
 - Open/verify dashboard can call `GET /api/health` and display backend status.
 - Update final Sprint 0 documentation after frontend and Swagger UI are verified.
 - Do not start Sprint 1 until the remaining verification is complete.
+
+## 2026-06-28
+
+### Sprint
+Sprint 0
+
+### Progress
+- Audited repository hygiene before continuing Sprint 0.
+- Confirmed tracked files do not include `.dotnet/`, `node_modules/`, `dist/`, `bin/`, `obj/`, coverage output, or generated report PDFs.
+- Confirmed ignored local generated folders exist in the workspace: `.dotnet/`, backend `bin/obj`, `frontend/node_modules/`, and `frontend/dist/`.
+- Checked for obvious secrets and found only placeholder local PostgreSQL credentials in `.env.example`, `docker-compose.yml`, and development appsettings.
+- Expanded `.gitignore` for logs, local appsettings, Vite cache, broader env files, symbols, and generated PDF reports.
+- Updated README with repository hygiene notes and clearer PostgreSQL port/test guidance.
+
+### Files Added
+- None
+
+### Files Modified
+- `.gitignore`
+- `README.md`
+- `docs/progress-log.md`
+
+### Commit
+chore: tidy repository hygiene documentation
+
+### Next Task
+- Review recommended local cleanup list.
+- Confirm whether local ignored generated folders should be deleted from the workspace.
+- Do not start Sprint 1 until Swagger UI and frontend dashboard verification are complete.

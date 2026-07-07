@@ -4,15 +4,15 @@ services:
     container_name: osint-toolkit-postgres
     restart: unless-stopped
     environment:
-      POSTGRES_DB: osint_toolkit
-      POSTGRES_USER: osint_toolkit
-      POSTGRES_PASSWORD: osint_toolkit_password
+      POSTGRES_DB: ${POSTGRES_DB:-osint_toolkit}
+      POSTGRES_USER: ${POSTGRES_USER:-osint_toolkit}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
     ports:
-      - "5433:5432"
+      - "${POSTGRES_PORT:-5433}:5432"
     volumes:
       - osint_toolkit_postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U osint_toolkit -d osint_toolkit"]
+      test: ["CMD-SHELL", "pg_isready -U \"$${POSTGRES_USER}\" -d \"$${POSTGRES_DB}\""]
       interval: 10s
       timeout: 5s
       retries: 5

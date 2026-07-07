@@ -4,12 +4,16 @@ Thumbs.db
 .idea/
 .vscode/
 *.swp
+*.log
 
 # Environment
 .env
+.env.*
 .env.local
 .env.*.local
 !.env.example
+appsettings.Local.json
+appsettings.*.Local.json
 
 # .NET
 .dotnet/
@@ -19,12 +23,15 @@ TestResults/
 *.user
 *.suo
 *.nupkg
+*.pdb
 
 # Frontend
 node_modules/
 dist/
 coverage/
+.vite/
 
 # Local data / generated artifacts
 reports/generated/*
+reports/generated/*.pdf
 !reports/generated/.gitkeep
