@@ -181,6 +181,35 @@ Sprint 0
 chore: tidy repository hygiene documentation
 
 ### Next Task
-- Review recommended local cleanup list.
-- Confirm whether local ignored generated folders should be deleted from the workspace.
-- Do not start Sprint 1 until Swagger UI and frontend dashboard verification are complete.
+- Verify the local environment and runtime of Sprint 0 foundation (database, backend, frontend, Swagger UI, and CORS).
+- Do not start Sprint 1 until Sprint 0 runtime verification is complete.
+
+## 2026-07-08
+
+### Sprint
+Sprint 0
+
+### Progress
+- Created root `.env` config file from `.env.example`.
+- Solved container daemon connection by unsetting `DOCKER_HOST` environment variable to connect directly to the active system Docker service.
+- Started PostgreSQL service container using Docker Compose mapped to host port 5433.
+- Executed `dotnet ef database update` to successfully apply initial EF Core migrations.
+- Ran all backend tests across Api, Core, and Infrastructure projects (all passed).
+- Launched backend API and verified `GET /api/health` returns status `Healthy`.
+- Verified Swagger UI HTML page loads correctly at `http://localhost:5080/swagger/index.html`.
+- Launched frontend Vite development server at `http://localhost:5173/`.
+- Verified frontend-to-backend CORS connection by sending requests with the local Origin header.
+- Fully completed Sprint 0 verification.
+
+### Files Added
+- `.env`
+
+### Files Modified
+- `docs/progress-log.md`
+
+### Commit
+chore: verify sprint 0 runtime and update progress log
+
+### Next Task
+- Start Sprint 1 - Scan Management.
+- Implement DNS lookup, WHOIS lookup, Username checker, and IP reputation modules.
