@@ -199,6 +199,7 @@ Sprint 0
 - Verified Swagger UI HTML page loads correctly at `http://localhost:5080/swagger/index.html`.
 - Launched frontend Vite development server at `http://localhost:5173/`.
 - Verified frontend-to-backend CORS connection by sending requests with the local Origin header.
+- Updated TypeScript configuration files (`tsconfig.app.json` and `tsconfig.node.json`) to use the modern `"bundler"` module resolution strategy to eliminate `node10` deprecation warnings.
 - Fully completed Sprint 0 verification.
 
 ### Files Added
@@ -206,9 +207,11 @@ Sprint 0
 
 ### Files Modified
 - `docs/progress-log.md`
+- `frontend/tsconfig.app.json`
+- `frontend/tsconfig.node.json`
 
 ### Commit
-chore: verify sprint 0 runtime and update progress log
+chore: verify sprint 0 runtime and update typescript configuration
 
 ### Next Task
 - Start Sprint 1 - Scan Management.
