@@ -216,3 +216,52 @@ chore: verify sprint 0 runtime and update typescript configuration
 ### Next Task
 - Start Sprint 1 - Scan Management.
 - Implement DNS lookup, WHOIS lookup, Username checker, and IP reputation modules.
+
+## 2026-07-15
+
+### Sprint
+Sprint 1
+
+### Progress
+- Implemented backend CRUD API endpoints (`POST`, `GET`, `DELETE` for `/api/scans`).
+- Added Request/Response DTOs, custom exception middleware handling, service, and repository layer for Scan entity.
+- Fixed EF Core InMemory database isolation issue by using a fixed db name `"OsintToolkit_InMemory"` during DI registration.
+- Fixed API tests JSON serialization issue by passing `JsonStringEnumConverter` settings to test HTTP clients.
+- Verified all 42 tests across Api, Core, and Infrastructure projects (all passed).
+
+### Files Added
+- `backend/src/OsintToolkit.Api/Contracts/Requests/CreateScanRequest.cs`
+- `backend/src/OsintToolkit.Api/Contracts/Responses/ScanDetailResponse.cs`
+- `backend/src/OsintToolkit.Api/Contracts/Responses/ScanResponse.cs`
+- `backend/src/OsintToolkit.Api/Contracts/Responses/ScanResultResponse.cs`
+- `backend/src/OsintToolkit.Api/Controllers/ScanController.cs`
+- `backend/src/OsintToolkit.Core/Exceptions/NotFoundException.cs`
+- `backend/src/OsintToolkit.Core/Exceptions/ValidationException.cs`
+- `backend/src/OsintToolkit.Core/Interfaces/IScanRepository.cs`
+- `backend/src/OsintToolkit.Core/Interfaces/IScanService.cs`
+- `backend/src/OsintToolkit.Core/Services/ScanService.cs`
+- `backend/src/OsintToolkit.Infrastructure/Repositories/ScanRepository.cs`
+- `backend/tests/OsintToolkit.Api.Tests/ScanEndpointTests.cs`
+- `backend/tests/OsintToolkit.Core.Tests/ScanServiceTests.cs`
+- `backend/tests/OsintToolkit.Infrastructure.Tests/ScanRepositoryTests.cs`
+- `frontend/src/api/scans.ts`
+- `frontend/src/types/scans.ts`
+
+### Files Modified
+- `backend/src/OsintToolkit.Api/Middleware/ExceptionHandlingMiddleware.cs`
+- `backend/src/OsintToolkit.Api/Program.cs`
+- `backend/src/OsintToolkit.Core/Services/TargetClassifier.cs`
+- `backend/src/OsintToolkit.Infrastructure/DependencyInjection.cs`
+- `backend/src/OsintToolkit.Infrastructure/OsintToolkit.Infrastructure.csproj`
+- `backend/tests/OsintToolkit.Api.Tests/OsintToolkit.Api.Tests.csproj`
+- `backend/tests/OsintToolkit.Core.Tests/TargetClassifierTests.cs`
+- `frontend/src/api/client.ts`
+- `docs/progress-log.md`
+
+### Commit
+feat: implement backend scan management mvp and verify tests
+
+### Next Task
+- Implement frontend UI for Scan Management (New Scan Form, Scan History, Scan Detail).
+- Start Sprint 2 - Real OSINT Modules.
+

@@ -1,6 +1,7 @@
 using System.Net;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
+using OsintToolkit.Core.Exceptions;
 
 namespace OsintToolkit.Api.Middleware;
 
@@ -11,6 +12,18 @@ public sealed class ExceptionHandlingMiddleware(RequestDelegate next, ILogger<Ex
         try
         {
             await next(context);
+        }
+        catch (ValidationException validationEx)
+        {
+            context.Response.StatusCode = (int)HttpStatusCode.BadRequest;
+            context.Response.ContentType = "application/json";
+            await context.Response.WriteAsJsonAsync(new { error = validationEx.Message });
+        }
+        catch (NotFoundException notFoundEx)
+        {
+            context.Response.StatusCode = (int)HttpStatusCode.NotFound;
+            context.Response.ContentType = "application/json";
+            await context.Response.WriteAsJsonAsync(new { error = notFoundEx.Message });
         }
         catch (Exception exception)
         {
@@ -27,3 +40,4 @@ public sealed class ExceptionHandlingMiddleware(RequestDelegate next, ILogger<Ex
         }
     }
 }
+

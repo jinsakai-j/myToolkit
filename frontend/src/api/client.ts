@@ -8,9 +8,40 @@ export async function apiGet<TResponse>(path: string): Promise<TResponse> {
   });
 
   if (!response.ok) {
-    throw new Error(`Request failed with status ${response.status}`);
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.error ?? `Request failed with status ${response.status}`);
   }
 
   return response.json() as Promise<TResponse>;
 }
+
+export async function apiPost<TRequest, TResponse>(path: string, body: TRequest): Promise<TResponse> {
+  const response = await fetch(`${API_BASE_URL}${path}`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Accept: 'application/json',
+    },
+    body: JSON.stringify(body),
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.error ?? `Request failed with status ${response.status}`);
+  }
+
+  return response.json() as Promise<TResponse>;
+}
+
+export async function apiDelete(path: string): Promise<void> {
+  const response = await fetch(`${API_BASE_URL}${path}`, {
+    method: 'DELETE',
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.error ?? `Request failed with status ${response.status}`);
+  }
+}
+
 
