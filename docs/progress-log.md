@@ -292,7 +292,48 @@ Sprint 1
 feat: implement frontend UI for scan management MVP and custom styling
 
 ### Next Task
-- Run and verify the end-to-end user flow locally.
 - Start Sprint 2 - Implement real OSINT modules (DNS Lookup, WHOIS, Email validation).
+
+## 2026-09-09
+
+### Sprint
+Sprint 2
+
+### Progress
+- Verified Sprint 1 end-to-end (PostgreSQL, backend health, frontend, scan CRUD flow, CORS preflight).
+- Designed a module abstraction in `OsintToolkit.Core`: `IOSINTModule`, `OSINTModuleResult`, and `ModuleRegistry`.
+- Implemented `DnsLookupModule` with a dependency-free DNS-over-UDP resolver (`DnsResolver`) that queries A, AAAA, MX, TXT, NS, and reverse PTR records.
+- Implemented `WhoisLookupModule` via the RDAP bootstrap service (`https://rdap.org/domain/...`). RDAP is the modern machine-readable successor to port-43 WHOIS and works in restricted networks where outbound TCP 43 is blocked. Set a custom User-Agent and `Accept: application/rdap+json` because Verisign's RDAP endpoint rejects the .NET default user agent.
+- Implemented `EmailValidationModule`: format check plus MX record lookup of the mail domain (no messages are ever sent).
+- Refactored `ScanService` to resolve and run modules per scan, replacing Sprint 1 placeholder results. Unknown modules fail the result, recognized-but-unimplemented modules are marked `Skipped`, scan status becomes `Completed` unless any module failed.
+- Verified the DNS resolver handles compressed names, null MX (`0 .`), TXT character strings, and reverse names.
+- Wrote tests: `ModuleRegistryTests` plus updated `ScanServiceTests` to inject a fake module resolver (no network in unit tests).
+- Ran `dotnet test -m:1`: 59 tests passed (API 7, Core 48, Infrastructure 4).
+- Verified end-to-end via the API for `google.com` (DnsLookup Completed, WhoisLookup Completed with registrar/expiry), `analyst@gmail.com` (EmailValidation Completed, 5 MX), `8.8.8.8` (DnsLookup PTR `dns.google`, IpReputation Skipped), and a username (UsernameChecker Skipped).
+- Cleaned up verification scan data.
+- Bumped milestone in README to v0.2.0-alpha / Sprint 2 and documented the module status table.
+
+### Files Added
+- `backend/src/OsintToolkit.Core/Modules/IOSINTModule.cs`
+- `backend/src/OsintToolkit.Core/Modules/OSINTModuleResult.cs`
+- `backend/src/OsintToolkit.Core/Modules/ModuleRegistry.cs`
+- `backend/src/OsintToolkit.Core/Modules/DnsResolver.cs`
+- `backend/src/OsintToolkit.Core/Modules/DnsLookupModule.cs`
+- `backend/src/OsintToolkit.Core/Modules/WhoisLookupModule.cs`
+- `backend/src/OsintToolkit.Core/Modules/EmailValidationModule.cs`
+- `backend/tests/OsintToolkit.Core.Tests/ModuleRegistryTests.cs`
+
+### Files Modified
+- `backend/src/OsintToolkit.Core/Services/ScanService.cs`
+- `backend/tests/OsintToolkit.Core.Tests/ScanServiceTests.cs`
+- `README.md`
+- `docs/progress-log.md`
+
+### Commit
+(not committed)
+
+### Next Task
+- Implement Sprint 3 modules: UsernameChecker (platform presence) and IpReputation (threat intelligence feed).
+- Revisit traditional port-43 WHOIS as an optional fallback behind RDAP.
 
 

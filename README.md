@@ -5,36 +5,36 @@
 ![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6)
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-4169E1)
 ![License](https://img.shields.io/badge/License-MIT-green)
-![Project Status](https://img.shields.io/badge/Status-Sprint%200%20Runtime%20Verification-yellow)
+![Project Status](https://img.shields.io/badge/Status-Sprint%202%20Real%20OSINT%20Modules-yellow)
 
 Local OSINT dashboard project for a cybersecurity and software engineering portfolio.
 
-The project is currently in **Sprint 0 - Project Foundation**. It only contains the application foundation: backend solution, PostgreSQL setup, EF Core entities/migration, frontend shell, health check, and test projects. Real OSINT modules are intentionally not implemented yet.
+The project is currently in **Sprint 2 - Real OSINT Modules**. Scan management (Sprint 1) is complete, and the first real OSINT modules (DNS lookup, WHOIS lookup, and email validation) are implemented and wired into scan runs.
 
 ## Project Status
 
 Current Version:
 
 ```text
-v0.1.0-alpha
+v0.2.0-alpha
 ```
 
 Current Sprint:
 
 ```text
-Sprint 0
+Sprint 2
 ```
 
 Current Status:
 
 ```text
-Runtime Verification
+Sprint 2 - Real OSINT Modules
 ```
 
 Next Milestone:
 
 ```text
-Sprint 1 - Scan Management
+Sprint 3 - Username Checker / IP Reputation
 ```
 
 ## Tech Stack
@@ -140,7 +140,7 @@ dotnet test -m:1
 
 ## Sprint 0 Status
 
-Implemented:
+Implemented in Sprint 0:
 
 - Backend solution structure
 - API, Core, Infrastructure, and test projects
@@ -155,12 +155,31 @@ Implemented:
 - Frontend health check call
 - `.env.example`
 
+Implemented in Sprint 1:
+
+- Scan CRUD API (`POST`, `GET`, `DELETE` `/api/scans`)
+- React frontend for New Scan, Scan History, and Scan Detail
+
+Implemented in Sprint 2 - Real OSINT modules:
+
+- DNS lookup (A, AAAA, MX, TXT, NS, reverse PTR) via a built-in DNS over UDP resolver
+- WHOIS lookup via the RDAP bootstrap service (machine-readable successor to port 43 WHOIS)
+- Email validation (format + MX record check)
+
+Sprint 2 module ids used by the frontend:
+
+```text
+DnsLookup       -> Domain, IpAddress (reverse)
+WhoisLookup     -> Domain
+EmailValidation -> Email
+UsernameChecker -> recognized but not implemented yet
+IpReputation    -> recognized but not implemented yet
+```
+
 Not implemented yet:
 
-- DNS lookup
-- WHOIS lookup
-- Username checker
-- IP reputation
+- Username checker (platform presence lookup)
+- IP reputation (threat intelligence feeds)
 - Report PDF
 - Python worker
 

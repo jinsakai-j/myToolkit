@@ -2,6 +2,7 @@ using OsintToolkit.Core.Entities;
 using OsintToolkit.Core.Enums;
 using OsintToolkit.Core.Exceptions;
 using OsintToolkit.Core.Interfaces;
+using OsintToolkit.Core.Modules;
 using OsintToolkit.Core.Services;
 using Xunit;
 
@@ -55,10 +56,10 @@ public sealed class ScanServiceTests
     }
 
     [Fact]
-    public async Task CreateScanAsync_WithValidTarget_SavesScanWithPlaceholderResults()
+    public async Task CreateScanAsync_WithValidTarget_SavesScanWithModuleResults()
     {
         var repository = new FakeScanRepository();
-        var service = new ScanService(repository);
+        var service = new ScanService(repository, _ => new FakeModule(ModuleStatus.Completed, "ok"));
         var modules = new List<string> { "DnsLookup", "WhoisLookup" };
 
         var scan = await service.CreateScanAsync("google.com", TargetType.Domain, modules);
@@ -73,7 +74,34 @@ public sealed class ScanServiceTests
 
         var firstResult = scan.Results.First();
         Assert.Equal("DnsLookup", firstResult.ModuleName);
-        Assert.Equal(ModuleStatus.Skipped, firstResult.Status);
+        Assert.Equal(ModuleStatus.Completed, firstResult.Status);
+        Assert.Equal("ok", firstResult.Summary);
+    }
+
+    [Fact]
+    public async Task CreateScanAsync_WithUnknownModule_RecordsFailedResult()
+    {
+        var repository = new FakeScanRepository();
+        var service = new ScanService(repository, _ => null);
+        var modules = new List<string> { "UnknownModule" };
+
+        var scan = await service.CreateScanAsync("google.com", TargetType.Domain, modules);
+
+        Assert.Equal(ScanStatus.Failed, scan.Status);
+        var result = Assert.Single(scan.Results);
+        Assert.Equal(ModuleStatus.Failed, result.Status);
+    }
+
+    [Fact]
+    public async Task CreateScanAsync_WithDuplicateModules_RunsOnce()
+    {
+        var repository = new FakeScanRepository();
+        var service = new ScanService(repository, _ => new FakeModule(ModuleStatus.Completed, "ok"));
+        var modules = new List<string> { "DnsLookup", "dnslookup" };
+
+        var scan = await service.CreateScanAsync("google.com", TargetType.Domain, modules);
+
+        Assert.Single(scan.Results);
     }
 
     [Fact]
@@ -121,5 +149,29 @@ public sealed class ScanServiceTests
 
         await Assert.ThrowsAsync<NotFoundException>(() =>
             service.DeleteScanAsync(Guid.NewGuid()));
+    }
+
+    private sealed class FakeModule : IOSINTModule
+    {
+        private readonly ModuleStatus _status;
+        private readonly string _summary;
+
+        public FakeModule(ModuleStatus status, string summary)
+        {
+            _status = status;
+            _summary = summary;
+        }
+
+        public string Name => "Fake";
+
+        public Task<OSINTModuleResult> ExecuteAsync(string target, TargetType targetType, CancellationToken cancellationToken = default)
+        {
+            return Task.FromResult(new OSINTModuleResult
+            {
+                Status = _status,
+                Summary = _summary,
+                RawData = "{\"fake\": true}"
+            });
+        }
     }
 }
