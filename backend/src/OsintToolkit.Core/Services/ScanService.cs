@@ -42,7 +42,7 @@ public sealed class ScanService : IScanService
             Status = ScanStatus.Pending,
             CreatedAt = DateTimeOffset.UtcNow,
             StartedAt = DateTimeOffset.UtcNow,
-            Notes = "Sprint 3 - OSINT Modules"
+            Notes = null
         };
 
         var moduleNames = (modules ?? new List<string>())
@@ -121,6 +121,14 @@ public sealed class ScanService : IScanService
 
         _scanRepository.Delete(scan);
         await _scanRepository.SaveChangesAsync(cancellationToken);
+    }
+
+    public async Task<Scan> UpdateNotesAsync(Guid id, string? notes, CancellationToken cancellationToken = default)
+    {
+        var scan = await GetScanByIdAsync(id, cancellationToken);
+        scan.Notes = string.IsNullOrWhiteSpace(notes) ? null : notes.Trim();
+        await _scanRepository.SaveChangesAsync(cancellationToken);
+        return scan;
     }
 
     private static ScanResult CreateResult(Guid scanId, string moduleName, ModuleStatus status, string? summary, string rawData)

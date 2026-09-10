@@ -35,3 +35,7 @@ export interface CreateScanRequest {
   targetType: TargetType;
   modules: string[];
 }
+
+export interface UpdateScanNotesRequest {
+  notes: string | null;
+}

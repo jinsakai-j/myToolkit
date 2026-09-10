@@ -120,6 +120,43 @@ public sealed class ScanEndpointTests : IClassFixture<WebApplicationFactory<Prog
     }
 
     [Fact]
+    public async Task UpdateScanNotes_ReturnsUpdatedScan()
+    {
+        using var client = _factory.CreateClient();
+
+        var createResponse = await client.PostAsJsonAsync("/api/scans", new CreateScanRequest
+        {
+            Target = "notes-test.com",
+            TargetType = TargetType.Domain,
+            Modules = new List<string>()
+        }, SerializerOptions);
+        var createdScan = await createResponse.Content.ReadFromJsonAsync<ScanResponse>(SerializerOptions);
+        Assert.NotNull(createdScan);
+
+        var response = await client.PatchAsJsonAsync($"/api/scans/{createdScan.Id}/notes", new UpdateScanNotesRequest
+        {
+            Notes = "needs SSL certificate review"
+        }, SerializerOptions);
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        var scan = await response.Content.ReadFromJsonAsync<ScanResponse>(SerializerOptions);
+        Assert.NotNull(scan);
+        Assert.Equal("needs SSL certificate review", scan.Notes);
+    }
+
+    [Fact]
+    public async Task UpdateScanNotes_ForMissingScan_ReturnsNotFound()
+    {
+        using var client = _factory.CreateClient();
+        var response = await client.PatchAsJsonAsync($"/api/scans/{Guid.NewGuid()}/notes", new UpdateScanNotesRequest
+        {
+            Notes = "x"
+        }, SerializerOptions);
+
+        Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+    }
+
+    [Fact]
     public async Task DeleteScan_WhenExists_ReturnsNoContent()
     {
         using var client = _factory.CreateClient();

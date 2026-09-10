@@ -8,5 +8,6 @@ public interface IScanService
     Task<Scan> CreateScanAsync(string target, TargetType targetType, List<string> modules, CancellationToken cancellationToken = default);
     Task<IReadOnlyList<Scan>> GetScansAsync(CancellationToken cancellationToken = default);
     Task<Scan> GetScanByIdAsync(Guid id, CancellationToken cancellationToken = default);
+    Task<Scan> UpdateNotesAsync(Guid id, string? notes, CancellationToken cancellationToken = default);
     Task DeleteScanAsync(Guid id, CancellationToken cancellationToken = default);
 }

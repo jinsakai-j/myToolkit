@@ -175,6 +175,43 @@ public sealed class ScanServiceTests
             service.DeleteScanAsync(Guid.NewGuid()));
     }
 
+    [Fact]
+    public async Task UpdateNotesAsync_WhenExists_UpdatesAndSaves()
+    {
+        var repository = new FakeScanRepository();
+        var scan = new Scan { Target = "test", TargetType = TargetType.Username };
+        repository.Scans.Add(scan);
+
+        var service = new ScanService(repository);
+        var updated = await service.UpdateNotesAsync(scan.Id, "  follow up next week  ");
+
+        Assert.Equal("follow up next week", updated.Notes);
+        Assert.True(repository.SaveChangesCalled);
+    }
+
+    [Fact]
+    public async Task UpdateNotesAsync_WithBlankNotes_ClearsNotes()
+    {
+        var repository = new FakeScanRepository();
+        var scan = new Scan { Target = "test", TargetType = TargetType.Username, Notes = "old" };
+        repository.Scans.Add(scan);
+
+        var service = new ScanService(repository);
+        var updated = await service.UpdateNotesAsync(scan.Id, "   ");
+
+        Assert.Null(updated.Notes);
+    }
+
+    [Fact]
+    public async Task UpdateNotesAsync_WhenNotExists_ThrowsNotFoundException()
+    {
+        var repository = new FakeScanRepository();
+        var service = new ScanService(repository);
+
+        await Assert.ThrowsAsync<NotFoundException>(() =>
+            service.UpdateNotesAsync(Guid.NewGuid(), "notes"));
+    }
+
     private sealed class FakeModule : IOSINTModule
     {
         private readonly ModuleStatus _status;

@@ -419,4 +419,46 @@ Sprint 3
 - Sprint 5: Python worker (e.g. a small companion script/service that post-processes exported reports or modules).
 - Optional: add abuseipdb/VirusTotal API-key-backed reputation feed behind the public-data heuristic.
 
+## 2026-09-10 (Sprint 5 - Passive Subdomain Finder / Scan Notes)
+
+### Progress
+- Implemented `SubdomainFinderModule`: passive subdomain enumeration from public certificate transparency logs via `crt.sh/?q=%25.{domain}&output=json`. `ParseCertificateData` splits newline-delimited `name_value` fields, filters wildcard entries and names outside the target domain, and returns a sorted de-duplicated list (first 500 stored in raw data, full count in summary). Fully passive; never contacts the target.
+- Registered `SubdomainFinder` in `ModuleRegistry` (Modules, KnownIds, `SupportedFor(Domain)`).
+- Added editable scan notes: `PATCH /api/scans/{scanId}/notes` -> `ScanService.UpdateNotesAsync` (trims, blank clears to null). Default scan notes are now `null` instead of the stale hard-coded sprint label.
+- Frontend: added the Subdomain Finder toggle to the Domain module list in New Scan, and an inline notes editor (Edit/Save/Cancel) in the Scan Detail Overview panel.
+- Verified end-to-end via API:
+  - `cloudflare.com` + SubdomainFinder -> Completed, "Found 3422 unique subdomain(s) ... via certificate transparency".
+  - `PATCH .../notes` with `{"notes":"review SSL certs from CT logs"}` -> 200, notes persisted.
+- Ran `dotnet test -m:1`: 80 tests passed (API 13, Core 63, Infrastructure 4).
+- Updated README to v0.5.0-alpha / Sprint 5.
+
+### Files Added
+- `backend/src/OsintToolkit.Core/Modules/SubdomainFinderModule.cs`
+- `backend/src/OsintToolkit.Api/Contracts/Requests/UpdateScanNotesRequest.cs`
+
+### Files Modified
+- `backend/src/OsintToolkit.Core/Modules/ModuleRegistry.cs`
+- `backend/src/OsintToolkit.Core/Interfaces/IScanService.cs`
+- `backend/src/OsintToolkit.Core/Services/ScanService.cs`
+- `backend/src/OsintToolkit.Api/Controllers/ScanController.cs`
+- `backend/tests/OsintToolkit.Core.Tests/ModuleRegistryTests.cs`
+- `backend/tests/OsintToolkit.Core.Tests/ScanServiceTests.cs`
+- `backend/tests/OsintToolkit.Api.Tests/ScanEndpointTests.cs`
+- `frontend/src/api/client.ts`
+- `frontend/src/api/scans.ts`
+- `frontend/src/types/scans.ts`
+- `frontend/src/pages/NewScan.tsx`
+- `frontend/src/pages/ScanDetail.tsx`
+- `frontend/src/styles/main.css`
+- `README.md`
+- `docs/progress-log.md`
+
+### Commit
+(not committed)
+
+### Next Task
+- Optional: abuseipdb/VirusTotal API-key-backed reputation feed behind the public-data heuristic.
+- Optional: verify subdomain findings (e.g. resolve the enumerated names) or export a subdomain list.
+- Python worker remains on hold per ADR-001 until a specific Python OSINT library justifies it.
+
 

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { getScanDetail, deleteScan } from '../api/scans';
+import { getScanDetail, deleteScan, updateScanNotes } from '../api/scans';
 import { generateReport, getScanReports, getReportDownloadUrl } from '../api/reports';
 import type { ScanDetail as ScanDetailType } from '../types/scans';
 import type { ScanReport } from '../types/reports';
@@ -20,6 +20,10 @@ export function ScanDetail({ scanId, onBack, onDeleted }: ScanDetailProps) {
   const [reportsLoading, setReportsLoading] = useState(false);
   const [reportGenLoading, setReportGenLoading] = useState(false);
   const [reportError, setReportError] = useState<string | null>(null);
+  const [notesValue, setNotesValue] = useState('');
+  const [notesEditing, setNotesEditing] = useState(false);
+  const [notesSaving, setNotesSaving] = useState(false);
+  const [notesError, setNotesError] = useState<string | null>(null);
 
   useEffect(() => {
     let isMounted = true;
@@ -28,6 +32,7 @@ export function ScanDetail({ scanId, onBack, onDeleted }: ScanDetailProps) {
       .then((data) => {
         if (isMounted) {
           setScan(data);
+          setNotesValue(data.notes ?? '');
           setError(null);
         }
       })
@@ -81,6 +86,30 @@ export function ScanDetail({ scanId, onBack, onDeleted }: ScanDetailProps) {
       }
     } finally {
       setReportGenLoading(false);
+    }
+  };
+
+  const handleEditNotes = () => {
+    setNotesValue(scan?.notes ?? '');
+    setNotesError(null);
+    setNotesEditing(true);
+  };
+
+  const handleSaveNotes = async () => {
+    setNotesSaving(true);
+    setNotesError(null);
+    try {
+      const updated = await updateScanNotes(scanId, { notes: notesValue.trim() || null });
+      setScan((current) => (current ? { ...current, notes: updated.notes } : current));
+      setNotesEditing(false);
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        setNotesError(err.message || 'Failed to save notes.');
+      } else {
+        setNotesError('Failed to save notes.');
+      }
+    } finally {
+      setNotesSaving(false);
     }
   };
 
@@ -185,12 +214,58 @@ export function ScanDetail({ scanId, onBack, onDeleted }: ScanDetailProps) {
               <dt>Created At</dt>
               <dd>{formatDateTime(scan.createdAt)}</dd>
             </div>
-            {scan.notes && (
-              <div>
-                <dt>Notes</dt>
-                <dd>{scan.notes}</dd>
-              </div>
-            )}
+            <div>
+              <dt>Notes</dt>
+              <dd>
+                {notesEditing ? (
+                  <div className="notes-editor">
+                    <textarea
+                      value={notesValue}
+                      onChange={(e) => setNotesValue(e.target.value)}
+                      rows={3}
+                      placeholder="Add notes about this scan..."
+                    />
+                    {notesError && (
+                      <div className="alert alert-danger" role="alert">
+                        <strong>Error:</strong> {notesError}
+                      </div>
+                    )}
+                    <div className="notes-editor-actions">
+                      <button
+                        type="button"
+                        className="btn btn-sm btn-primary"
+                        onClick={handleSaveNotes}
+                        disabled={notesSaving}
+                      >
+                        {notesSaving ? 'Saving...' : 'Save'}
+                      </button>
+                      <button
+                        type="button"
+                        className="btn btn-sm btn-secondary"
+                        onClick={() => {
+                          setNotesEditing(false);
+                          setNotesError(null);
+                        }}
+                        disabled={notesSaving}
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <span className="notes-display">
+                    {scan.notes || <em className="text-muted">No notes yet.</em>}
+                    <button
+                      type="button"
+                      className="btn btn-sm btn-secondary notes-edit-btn"
+                      onClick={handleEditNotes}
+                    >
+                      Edit
+                    </button>
+                  </span>
+                )}
+              </dd>
+            </div>
           </dl>
         </article>
 

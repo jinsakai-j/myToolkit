@@ -14,6 +14,7 @@ public sealed class ModuleRegistryTests
     [InlineData("EmailValidation", true)]
     [InlineData("UsernameChecker", true)]
     [InlineData("IpReputation", true)]
+    [InlineData("SubdomainFinder", true)]
     [InlineData("Nope", false)]
     public void IsKnown_MatchesFrontendModuleIds(string moduleName, bool expected)
     {
@@ -28,6 +29,7 @@ public sealed class ModuleRegistryTests
         Assert.IsType<EmailValidationModule>(ModuleRegistry.Resolve("EmailValidation"));
         Assert.IsType<UsernameCheckerModule>(ModuleRegistry.Resolve("UsernameChecker"));
         Assert.IsType<IpReputationModule>(ModuleRegistry.Resolve("IpReputation"));
+        Assert.IsType<SubdomainFinderModule>(ModuleRegistry.Resolve("SubdomainFinder"));
     }
 
     [Fact]
@@ -37,7 +39,7 @@ public sealed class ModuleRegistryTests
     }
 
     [Theory]
-    [InlineData(TargetType.Domain, new[] { "DnsLookup", "WhoisLookup" })]
+    [InlineData(TargetType.Domain, new[] { "DnsLookup", "WhoisLookup", "SubdomainFinder" })]
     [InlineData(TargetType.Email, new[] { "EmailValidation" })]
     [InlineData(TargetType.Username, new[] { "UsernameChecker" })]
     [InlineData(TargetType.IpAddress, new[] { "DnsLookup", "IpReputation" })]
@@ -70,5 +72,48 @@ public sealed class ModuleRegistryTests
             new UsernameCheckerModule().ExecuteAsync("someuser", TargetType.Username, cts.Token));
         await Assert.ThrowsAnyAsync<OperationCanceledException>(() =>
             new IpReputationModule().ExecuteAsync("8.8.8.8", TargetType.IpAddress, cts.Token));
+        await Assert.ThrowsAnyAsync<OperationCanceledException>(() =>
+            new SubdomainFinderModule().ExecuteAsync("example.com", TargetType.Domain, cts.Token));
+    }
+
+    [Fact]
+    public void ParseCertificateData_FiltersWildcardsAndNonMatchingNames()
+    {
+        var json = """
+            [
+              { "name_value": "www.example.com\n*.example.com", "common_name": "example.com" },
+              { "name_value": "api.example.com", "common_name": "api.example.com" },
+              { "name_value": "example.com", "common_name": "example.com" },
+              { "name_value": "evil-other.com", "common_name": "evil-other.com" }
+            ]
+            """;
+
+        var result = SubdomainFinderModule.ParseCertificateData(json, "example.com");
+
+        Assert.Equal(new[] { "api.example.com", "www.example.com" }, result);
+    }
+
+    [Fact]
+    public void ParseCertificateData_DeduplicatesAcrossEntries()
+    {
+        var json = """
+            [
+              { "name_value": "a.example.com" },
+              { "name_value": "A.example.com" },
+              { "name_value": "b.example.com\nb.example.com" }
+            ]
+            """;
+
+        var result = SubdomainFinderModule.ParseCertificateData(json, "example.com");
+
+        Assert.Equal(new[] { "a.example.com", "b.example.com" }, result);
+    }
+
+    [Fact]
+    public void ParseCertificateData_InvalidJson_ReturnsEmpty()
+    {
+        var result = SubdomainFinderModule.ParseCertificateData("not json", "example.com");
+
+        Assert.Empty(result);
     }
 }

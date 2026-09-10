@@ -749,6 +749,42 @@ a {
   color: #64748b;
 }
 
+/* Notes editor */
+.notes-display {
+  display: inline-flex;
+  align-items: flex-start;
+  gap: 8px;
+  max-width: 100%;
+}
+
+.notes-edit-btn {
+  flex-shrink: 0;
+}
+
+.notes-editor {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+
+.notes-editor textarea {
+  width: 100%;
+  padding: 8px 10px;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  font-size: 14px;
+  font-family: inherit;
+  resize: vertical;
+  background: #fff;
+  color: #0f172a;
+}
+
+.notes-editor-actions {
+  display: flex;
+  gap: 8px;
+}
+
 .text-muted {
   color: #64748b;
 }

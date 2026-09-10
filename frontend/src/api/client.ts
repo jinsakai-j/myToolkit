@@ -44,4 +44,22 @@ export async function apiDelete(path: string): Promise<void> {
   }
 }
 
+export async function apiPatch<TRequest, TResponse>(path: string, body: TRequest): Promise<TResponse> {
+  const response = await fetch(`${API_BASE_URL}${path}`, {
+    method: 'PATCH',
+    headers: {
+      'Content-Type': 'application/json',
+      Accept: 'application/json',
+    },
+    body: JSON.stringify(body),
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.error ?? `Request failed with status ${response.status}`);
+  }
+
+  return response.json() as Promise<TResponse>;
+}
+
 

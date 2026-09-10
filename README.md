@@ -5,36 +5,36 @@
 ![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6)
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-4169E1)
 ![License](https://img.shields.io/badge/License-MIT-green)
-![Project Status](https://img.shields.io/badge/Status-Sprint%204%20Report%20PDF-green)
+![Project Status](https://img.shields.io/badge/Status-Sprint%205%20Subdomain%20Finder%20%2F%20Notes-blue)
 
 Local OSINT dashboard project for a cybersecurity and software engineering portfolio.
 
-The project is currently in **Sprint 4 - Report PDF**. OSINT scan management (Sprint 1), five real modules (DNS, WHOIS/RDAP, email validation, username checker, IP reputation), and per-scan heuristic risk scores are complete; scans can now be exported to a formatted PDF report (A4) with header, metadata, and per-module JSON details.
+The project is currently in **Sprint 5 - Passive Subdomain Finder / Scan Notes**. OSINT scan management (Sprint 1), six real modules (DNS, WHOIS/RDAP, email validation, username checker, IP reputation, passive subdomain finder), per-scan heuristic risk scores, and PDF report export (Sprint 4) are complete; scans now come with editable analyst notes.
 
 ## Project Status
 
 Current Version:
 
 ```text
-v0.4.0-alpha
+v0.5.0-alpha
 ```
 
 Current Sprint:
 
 ```text
-Sprint 4
+Sprint 5
 ```
 
 Current Status:
 
 ```text
-Sprint 4 - Report PDF
+Sprint 5 - Subdomain Finder / Scan Notes
 ```
 
 Next Milestone:
 
 ```text
-Sprint 5 - Python worker
+Sprint 6 - Python worker (on hold until a specific Python OSINT library justifies it)
 ```
 
 ## Tech Stack
@@ -179,6 +179,7 @@ WhoisLookup     -> Domain (RDAP)
 EmailValidation -> Email
 UsernameChecker -> Username (GitHub, GitLab, HackerNews)
 IpReputation    -> IpAddress (ipinfo.io + heuristics, RiskScore 0-100)
+SubdomainFinder -> Domain (crt.sh certificate transparency)
 ```
 
 Implemented in Sprint 4 - Report PDF:
@@ -187,9 +188,14 @@ Implemented in Sprint 4 - Report PDF:
 - `POST /api/scans/{scanId}/reports` generates and persists a `Report` row (writes the file to `Report:OutputDirectory`), `GET /api/scans/{scanId}/reports` lists reports, and `GET /api/reports/{reportId}/download` streams the PDF.
 - Scan Detail page: Generate Report button, report list with download links.
 
+Implemented in Sprint 5 - Passive Subdomain Finder / Scan Notes:
+
+- `SubdomainFinderModule`: passive subdomain enumeration from public certificate transparency logs (crt.sh), deduplicated and filtered to the target domain (wildcards and foreign names excluded). Fully passive; the target infrastructure is never contacted.
+- `PATCH /api/scans/{scanId}/notes` updates the analyst notes field; Scan Detail now has an inline notes editor instead of a hard-coded label.
+
 Not implemented yet:
 
-- Python worker
+- Python worker (on hold; see ADR-001)
 
 ## Repository Hygiene
 

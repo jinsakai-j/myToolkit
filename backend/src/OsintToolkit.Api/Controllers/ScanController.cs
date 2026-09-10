@@ -53,6 +53,13 @@ public sealed class ScanController(IScanService scanService) : ControllerBase
         return NoContent();
     }
 
+    [HttpPatch("{scanId:guid}/notes")]
+    public async Task<ActionResult<ScanResponse>> UpdateScanNotes([FromRoute] Guid scanId, [FromBody] UpdateScanNotesRequest request, CancellationToken cancellationToken)
+    {
+        var scan = await scanService.UpdateNotesAsync(scanId, request.Notes, cancellationToken);
+        return Ok(MapToScanResponse(scan));
+    }
+
     private static ScanResponse MapToScanResponse(Scan scan)
     {
         return new ScanResponse

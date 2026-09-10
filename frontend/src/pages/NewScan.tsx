@@ -11,6 +11,7 @@ const MODULE_DEFINITIONS = {
   Domain: [
     { id: 'DnsLookup', name: 'DNS Lookup', desc: 'Queries MX, A, AAAA, TXT, NS records' },
     { id: 'WhoisLookup', name: 'WHOIS Lookup', desc: 'Queries registrar, expiry date, and details' },
+    { id: 'SubdomainFinder', name: 'Subdomain Finder', desc: 'Enumerates subdomains via certificate transparency' },
   ],
   Email: [
     { id: 'EmailValidation', name: 'Email Validation', desc: 'Validates format and checks MX record' },
