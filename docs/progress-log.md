@@ -376,4 +376,47 @@ Sprint 3
 - Sprint 4: Report PDF generation from scan results.
 - Optional: add abuseipdb/VirusTotal API-key-backed reputation feed behind the public-data heuristic.
 
+## 2026-09-10 (Sprint 4 - Report PDF)
+
+### Progress
+- Added PdfSharp 6.2.4 to the Infrastructure project and implemented `PdfReportGenerator` (`IReportPdfGenerator`): A4 portrait PDF with scan header, metadata (target, status, risk score, timestamps, scan ID, notes), and one section per module result including pretty-printed raw JSON. Auto page breaks, soft line wrapping, and a `FontResolver` mapping the base-14 Helvetica/Courier names to system DejaVu fonts (PdfSharp 6 no longer bundles base-14 fonts).
+- Added `ReportService` plus `ReportRepository` and registered report dependencies in DI. `ReportService` writes the PDF to `Report:OutputDirectory` (default `reports/generated/`), normalizes custom file names to `.pdf`, and persists a `Report` row.
+- Added `ReportController` with three endpoints: `POST /api/scans/{scanId}/reports` (201 + report), `GET /api/scans/{scanId}/reports` (list), `GET /api/reports/{reportId}/download` (application/pdf, attachment filename).
+- Added frontend report UI in the Scan Detail page: Generate Report button, report list with generated-at timestamps, and Download links that open the PDF.
+- Verified end-to-end via API: created a DNS scan, generated `e2e-report.pdf` (52.2 KB, `%PDF-1.7`), confirmed it is listed and downloadable with `application/pdf`, and that the file lands in `reports/generated/`.
+- Ran `dotnet test -m:1`: 71 tests passed (API 11, Core 56, Infrastructure 4).
+- Updated README to v0.4.0-alpha / Sprint 4.
+
+### Files Added
+- `backend/src/OsintToolkit.Core/Interfaces/IReportRepository.cs`
+- `backend/src/OsintToolkit.Core/Interfaces/IReportPdfGenerator.cs`
+- `backend/src/OsintToolkit.Core/Interfaces/IReportService.cs`
+- `backend/src/OsintToolkit.Core/Services/ReportService.cs`
+- `backend/src/OsintToolkit.Infrastructure/Repositories/ReportRepository.cs`
+- `backend/src/OsintToolkit.Infrastructure/Services/PdfReportGenerator.cs`
+- `backend/src/OsintToolkit.Infrastructure/Services/FontResolver.cs`
+- `backend/src/OsintToolkit.Api/Controllers/ReportController.cs`
+- `backend/src/OsintToolkit.Api/Contracts/Requests/GenerateReportRequest.cs`
+- `backend/src/OsintToolkit.Api/Contracts/Responses/ReportResponse.cs`
+- `backend/tests/OsintToolkit.Core.Tests/ReportServiceTests.cs`
+- `backend/tests/OsintToolkit.Api.Tests/ReportEndpointTests.cs`
+- `frontend/src/api/reports.ts`
+- `frontend/src/types/reports.ts`
+
+### Files Modified
+- `backend/src/OsintToolkit.Infrastructure/OsintToolkit.Infrastructure.csproj`
+- `backend/src/OsintToolkit.Infrastructure/DependencyInjection.cs`
+- `backend/src/OsintToolkit.Api/appsettings.json`
+- `frontend/src/pages/ScanDetail.tsx`
+- `frontend/src/styles/main.css`
+- `README.md`
+- `docs/progress-log.md`
+
+### Commit
+(not committed)
+
+### Next Task
+- Sprint 5: Python worker (e.g. a small companion script/service that post-processes exported reports or modules).
+- Optional: add abuseipdb/VirusTotal API-key-backed reputation feed behind the public-data heuristic.
+
 

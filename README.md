@@ -5,36 +5,36 @@
 ![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6)
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-4169E1)
 ![License](https://img.shields.io/badge/License-MIT-green)
-![Project Status](https://img.shields.io/badge/Status-Sprint%203%20Username%20Checker%20%2F%20IP%20Reputation-yellow)
+![Project Status](https://img.shields.io/badge/Status-Sprint%204%20Report%20PDF-green)
 
 Local OSINT dashboard project for a cybersecurity and software engineering portfolio.
 
-The project is currently in **Sprint 3 - Username Checker / IP Reputation**. OSINT scan management (Sprint 1) and four real modules (DNS, WHOIS/RDAP, email validation, username checker) are complete; IP reputation now enriches lookup data with a heuristic risk score.
+The project is currently in **Sprint 4 - Report PDF**. OSINT scan management (Sprint 1), five real modules (DNS, WHOIS/RDAP, email validation, username checker, IP reputation), and per-scan heuristic risk scores are complete; scans can now be exported to a formatted PDF report (A4) with header, metadata, and per-module JSON details.
 
 ## Project Status
 
 Current Version:
 
 ```text
-v0.3.0-alpha
+v0.4.0-alpha
 ```
 
 Current Sprint:
 
 ```text
-Sprint 3
+Sprint 4
 ```
 
 Current Status:
 
 ```text
-Sprint 3 - Username Checker / IP Reputation
+Sprint 4 - Report PDF
 ```
 
 Next Milestone:
 
 ```text
-Sprint 4 - Report PDF
+Sprint 5 - Python worker
 ```
 
 ## Tech Stack
@@ -181,9 +181,14 @@ UsernameChecker -> Username (GitHub, GitLab, HackerNews)
 IpReputation    -> IpAddress (ipinfo.io + heuristics, RiskScore 0-100)
 ```
 
+Implemented in Sprint 4 - Report PDF:
+
+- PdfSharp-based PDF report generator (A4 portrait) with scan header, metadata (target, status, risk score, timestamps, scan ID), and one section per module result including pretty-printed raw JSON. Auto page breaks and soft line wrapping via a DejaVu font resolver (no bundled font files).
+- `POST /api/scans/{scanId}/reports` generates and persists a `Report` row (writes the file to `Report:OutputDirectory`), `GET /api/scans/{scanId}/reports` lists reports, and `GET /api/reports/{reportId}/download` streams the PDF.
+- Scan Detail page: Generate Report button, report list with download links.
+
 Not implemented yet:
 
-- Report PDF
 - Python worker
 
 ## Repository Hygiene

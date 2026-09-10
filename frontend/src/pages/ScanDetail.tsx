@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
 import { getScanDetail, deleteScan } from '../api/scans';
+import { generateReport, getScanReports, getReportDownloadUrl } from '../api/reports';
 import type { ScanDetail as ScanDetailType } from '../types/scans';
+import type { ScanReport } from '../types/reports';
 
 type ScanDetailProps = {
   scanId: string;
@@ -14,6 +16,10 @@ export function ScanDetail({ scanId, onBack, onDeleted }: ScanDetailProps) {
   const [error, setError] = useState<string | null>(null);
   const [expandedResultId, setExpandedResultId] = useState<string | null>(null);
   const [deleteLoading, setDeleteLoading] = useState(false);
+  const [reports, setReports] = useState<ScanReport[]>([]);
+  const [reportsLoading, setReportsLoading] = useState(false);
+  const [reportGenLoading, setReportGenLoading] = useState(false);
+  const [reportError, setReportError] = useState<string | null>(null);
 
   useEffect(() => {
     let isMounted = true;
@@ -40,6 +46,43 @@ export function ScanDetail({ scanId, onBack, onDeleted }: ScanDetailProps) {
       isMounted = false;
     };
   }, [scanId]);
+
+  const loadReports = async () => {
+    setReportsLoading(true);
+    setReportError(null);
+    try {
+      const data = await getScanReports(scanId);
+      setReports(data);
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        setReportError(err.message);
+      }
+    } finally {
+      setReportsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadReports();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [scanId]);
+
+  const handleGenerateReport = async () => {
+    setReportGenLoading(true);
+    setReportError(null);
+    try {
+      await generateReport(scanId);
+      await loadReports();
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        setReportError(err.message || 'Failed to generate report.');
+      } else {
+        setReportError('Failed to generate report.');
+      }
+    } finally {
+      setReportGenLoading(false);
+    }
+  };
 
   const handleDelete = async () => {
     if (!window.confirm('Are you sure you want to delete this scan and all its results? This action cannot be undone.')) {
@@ -205,6 +248,55 @@ export function ScanDetail({ scanId, onBack, onDeleted }: ScanDetailProps) {
                 );
               })}
             </div>
+          )}
+        </article>
+
+        <article className="panel reports-panel">
+          <div className="panel-header">
+            <h3>Reports ({reports.length})</h3>
+            <button
+              type="button"
+              className="btn btn-sm btn-primary"
+              onClick={handleGenerateReport}
+              disabled={reportGenLoading || reportsLoading}
+            >
+              {reportGenLoading ? 'Generating...' : 'Generate Report'}
+            </button>
+          </div>
+
+          {reportError && (
+            <div className="alert alert-danger" role="alert">
+              <strong>Error:</strong> {reportError}
+            </div>
+          )}
+
+          {reportsLoading ? (
+            <p className="reports-loading">Loading reports...</p>
+          ) : reports.length === 0 ? (
+            <div className="empty-state">
+              <p>No reports yet. Generate a PDF report for this scan.</p>
+            </div>
+          ) : (
+            <ul className="reports-list">
+              {reports.map((report) => (
+                <li key={report.id} className="report-item">
+                  <div className="report-item-info">
+                    <span className="report-item-name">{report.fileName}</span>
+                    <span className="report-item-date">
+                      Generated: {formatDateTime(report.generatedAt)}
+                    </span>
+                  </div>
+                  <a
+                    className="btn btn-sm btn-secondary"
+                    href={getReportDownloadUrl(report.id)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    Download
+                  </a>
+                </li>
+              ))}
+            </ul>
           )}
         </article>
       </section>

@@ -5,6 +5,7 @@ using OsintToolkit.Core.Interfaces;
 using OsintToolkit.Core.Services;
 using OsintToolkit.Infrastructure.Data;
 using OsintToolkit.Infrastructure.Repositories;
+using OsintToolkit.Infrastructure.Services;
 
 namespace OsintToolkit.Infrastructure;
 
@@ -29,6 +30,9 @@ public static class DependencyInjection
         // Register repositories and services
         services.AddScoped<IScanRepository, ScanRepository>();
         services.AddScoped<IScanService, ScanService>();
+        services.AddScoped<IReportRepository, ReportRepository>();
+        services.AddScoped<IReportPdfGenerator, PdfReportGenerator>();
+        services.AddScoped<IReportService, ReportService>();
 
         return services;
     }
