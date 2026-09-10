@@ -498,4 +498,29 @@ Sprint 3
 - Optional: export CSV of resolved subdomains, or batch re-verify on demand.
 - Python worker remains on hold per ADR-001 until a specific Python OSINT library justifies it.
 
+## 2026-09-10 (Sprint 5c - Dashboard UX)
+
+### Progress
+- Scan History dashboard: added a target search box (case-insensitive client-side filter) alongside the existing type/status server filters.
+- Added sort options: newest/oldest, highest/lowest risk score, target A-Z / Z-A.
+- Replaced the plain `x/100` risk cell with color-coded risk badges (low <= 33, medium <= 66, high > 66, gray for no score).
+- Added an empty-search table row ("No scans match the current search or filters") and a `Showing n of m scan(s)` counter.
+- Verified with live scans via API: `8.8.8.8` (risk 5 -> low badge), `185.220.101.4` (risk 55 -> medium badge), plus domain/username scans without a risk score (N/A badge).
+- Frontend `npm run lint` + `npm run build` pass (types only; table/filter logic is client-side).
+- Updated README to v0.5.2-alpha / Sprint 5c.
+
+### Files Modified
+- `frontend/src/pages/Dashboard.tsx`
+- `frontend/src/styles/main.css`
+- `README.md`
+- `docs/progress-log.md`
+
+### Commit
+(not committed)
+
+### Next Task
+- Optional: re-run modules from an existing scan (re-scan) and/or CSV export of resolved subdomains.
+- Optional: abuseipdb/VirusTotal API-key-backed reputation feed behind the public-data heuristic.
+- Python worker remains on hold per ADR-001 until a specific Python OSINT library justifies it.
+
 

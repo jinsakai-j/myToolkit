@@ -459,6 +459,18 @@ a {
   width: auto;
 }
 
+.search-input-sm {
+  padding: 6px 12px;
+  font-size: 13px;
+  width: 200px;
+}
+
+@media (max-width: 1100px) {
+  .search-input-sm {
+    width: 120px;
+  }
+}
+
 .table-responsive {
   width: 100%;
   overflow-x: auto;
@@ -561,6 +573,39 @@ a {
 .badge--module-failed {
   background: #ffe1df;
   color: #8a1f17;
+}
+
+/* Risk badges */
+.risk-badge--low {
+  background: #daf8e6;
+  color: #17623a;
+}
+
+.risk-badge--medium {
+  background: #fff7df;
+  color: #7a4f00;
+}
+
+.risk-badge--high {
+  background: #ffe1df;
+  color: #8a1f17;
+}
+
+.risk-badge--none {
+  background: #f1f5f9;
+  color: #64748b;
+}
+
+.table-empty-row {
+  text-align: center;
+  color: #64748b;
+  padding: 32px 16px !important;
+}
+
+.table-count {
+  margin: 12px 0 0;
+  font-size: 12px;
+  color: #64748b;
 }
 
 /* Details and Panel layouts */

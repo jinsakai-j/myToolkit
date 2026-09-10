@@ -5,36 +5,36 @@
 ![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6)
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-4169E1)
 ![License](https://img.shields.io/badge/License-MIT-green)
-![Project Status](https://img.shields.io/badge/Status-Sprint%205b%20Subdomain%20Verify%20%2F%20Export-blueviolet)
+![Project Status](https://img.shields.io/badge/Status-Sprint%205c%20Dashboard%20UX-blueviolet)
 
 Local OSINT dashboard project for a cybersecurity and software engineering portfolio.
 
-The project is currently in **Sprint 5b - Subdomain Verification / JSON Export**. OSINT scan management (Sprint 1), six real modules (DNS, WHOIS/RDAP, email validation, username checker, IP reputation, passive subdomain finder), passive subdomain-to-IP verification, per-scan heuristic risk scores, and PDF report export (Sprint 4) are complete; scans now support editable analyst notes and one-click JSON export.
+The project is currently in **Sprint 5c - Dashboard UX**. OSINT scan management (Sprint 1), six real modules plus passive subdomain verification, per-scan heuristic risk scores, PDF report export (Sprint 4), editable analyst notes, and JSON export (Sprint 5b) are complete; the Scan History dashboard now supports search, richer filters, sorting, and color-coded risk badges.
 
 ## Project Status
 
 Current Version:
 
 ```text
-v0.5.1-alpha
+v0.5.2-alpha
 ```
 
 Current Sprint:
 
 ```text
-Sprint 5b
+Sprint 5c
 ```
 
 Current Status:
 
 ```text
-Sprint 5b - Subdomain Verification / JSON Export
+Sprint 5c - Dashboard UX
 ```
 
 Next Milestone:
 
 ```text
-Sprint 6 - further OSINT modules or threat-intel feeds (or Python worker when justified)
+Sprint 6 - further OSINT modules, analyst workflows (re-scan, CSV export), or threat-intel feeds
 ```
 
 ## Tech Stack
@@ -198,6 +198,13 @@ Implemented in Sprint 5b - Subdomain Verification / JSON Export:
 
 - `SubdomainResolveModule`: reuses the passive crt.sh candidates and resolves up to 25 of them to A/AAAA records via the built-in DNS resolver, so discovered subdomains get verified against live DNS. Only names already attested in public CT logs are resolved (no brute force). Shared crt.sh fetch helper now retries once on transient 5xx (crt.sh is occasionally flaky).
 - `GET /api/scans/{scanId}/export` downloads the full scan detail (metadata + module results) as formatted JSON, camelCase to match the rest of the API. Scan Detail page has an Export JSON button next to Back.
+
+Implemented in Sprint 5c - Dashboard UX:
+
+- Scan History dashboard search box (case-insensitive target search).
+- Sort options: newest/oldest, highest/lowest risk, target A-Z / Z-A.
+- Color-coded risk badges (`low` <= 33, `medium` <= 66, `high` > 66) replacing the plain `x/100` text.
+- Empty-search state and a `Showing n of m scan(s)` counter under the table.
 
 Not implemented yet:
 
