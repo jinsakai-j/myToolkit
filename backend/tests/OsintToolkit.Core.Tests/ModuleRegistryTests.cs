@@ -15,6 +15,7 @@ public sealed class ModuleRegistryTests
     [InlineData("UsernameChecker", true)]
     [InlineData("IpReputation", true)]
     [InlineData("SubdomainFinder", true)]
+    [InlineData("SubdomainResolve", true)]
     [InlineData("Nope", false)]
     public void IsKnown_MatchesFrontendModuleIds(string moduleName, bool expected)
     {
@@ -30,6 +31,7 @@ public sealed class ModuleRegistryTests
         Assert.IsType<UsernameCheckerModule>(ModuleRegistry.Resolve("UsernameChecker"));
         Assert.IsType<IpReputationModule>(ModuleRegistry.Resolve("IpReputation"));
         Assert.IsType<SubdomainFinderModule>(ModuleRegistry.Resolve("SubdomainFinder"));
+        Assert.IsType<SubdomainResolveModule>(ModuleRegistry.Resolve("SubdomainResolve"));
     }
 
     [Fact]
@@ -39,7 +41,7 @@ public sealed class ModuleRegistryTests
     }
 
     [Theory]
-    [InlineData(TargetType.Domain, new[] { "DnsLookup", "WhoisLookup", "SubdomainFinder" })]
+    [InlineData(TargetType.Domain, new[] { "DnsLookup", "WhoisLookup", "SubdomainFinder", "SubdomainResolve" })]
     [InlineData(TargetType.Email, new[] { "EmailValidation" })]
     [InlineData(TargetType.Username, new[] { "UsernameChecker" })]
     [InlineData(TargetType.IpAddress, new[] { "DnsLookup", "IpReputation" })]
@@ -74,6 +76,8 @@ public sealed class ModuleRegistryTests
             new IpReputationModule().ExecuteAsync("8.8.8.8", TargetType.IpAddress, cts.Token));
         await Assert.ThrowsAnyAsync<OperationCanceledException>(() =>
             new SubdomainFinderModule().ExecuteAsync("example.com", TargetType.Domain, cts.Token));
+        await Assert.ThrowsAnyAsync<OperationCanceledException>(() =>
+            new SubdomainResolveModule().ExecuteAsync("example.com", TargetType.Domain, cts.Token));
     }
 
     [Fact]

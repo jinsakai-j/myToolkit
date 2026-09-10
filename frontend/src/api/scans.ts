@@ -1,6 +1,12 @@
 import { apiGet, apiPost, apiDelete, apiPatch } from './client';
 import type { Scan, ScanDetail, CreateScanRequest, TargetType, ScanStatus, UpdateScanNotesRequest } from '../types/scans';
 
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:5080';
+
+export function getScanExportUrl(scanId: string): string {
+  return `${API_BASE_URL}/api/scans/${scanId}/export`;
+}
+
 export async function createScan(request: CreateScanRequest): Promise<Scan> {
   return apiPost<CreateScanRequest, Scan>('/api/scans', request);
 }

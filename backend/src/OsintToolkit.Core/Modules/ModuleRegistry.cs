@@ -16,7 +16,8 @@ public sealed class ModuleRegistry
         [new EmailValidationModule().Name] = new EmailValidationModule(),
         [new UsernameCheckerModule().Name] = new UsernameCheckerModule(),
         [new IpReputationModule().Name] = new IpReputationModule(),
-        [new SubdomainFinderModule().Name] = new SubdomainFinderModule()
+        [new SubdomainFinderModule().Name] = new SubdomainFinderModule(),
+        [new SubdomainResolveModule().Name] = new SubdomainResolveModule()
     };
 
     private static readonly HashSet<string> KnownIds = new(StringComparer.OrdinalIgnoreCase)
@@ -26,7 +27,8 @@ public sealed class ModuleRegistry
         "EmailValidation",
         "UsernameChecker",
         "IpReputation",
-        "SubdomainFinder"
+        "SubdomainFinder",
+        "SubdomainResolve"
     };
 
     public static bool IsKnown(string moduleName) => KnownIds.Contains(moduleName);
@@ -40,7 +42,7 @@ public sealed class ModuleRegistry
     {
         return targetType switch
         {
-            TargetType.Domain => new[] { "DnsLookup", "WhoisLookup", "SubdomainFinder" },
+            TargetType.Domain => new[] { "DnsLookup", "WhoisLookup", "SubdomainFinder", "SubdomainResolve" },
             TargetType.Email => new[] { "EmailValidation" },
             TargetType.Username => new[] { "UsernameChecker" },
             TargetType.IpAddress => new[] { "DnsLookup", "IpReputation" },

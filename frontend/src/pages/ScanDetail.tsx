@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { getScanDetail, deleteScan, updateScanNotes } from '../api/scans';
+import { getScanDetail, deleteScan, updateScanNotes, getScanExportUrl } from '../api/scans';
 import { generateReport, getScanReports, getReportDownloadUrl } from '../api/reports';
 import type { ScanDetail as ScanDetailType } from '../types/scans';
 import type { ScanReport } from '../types/reports';
@@ -178,6 +178,14 @@ export function ScanDetail({ scanId, onBack, onDeleted }: ScanDetailProps) {
           <button type="button" className="btn btn-secondary" onClick={onBack} disabled={deleteLoading}>
             Back
           </button>
+          <a
+            className="btn btn-secondary"
+            href={getScanExportUrl(scan.id)}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Export JSON
+          </a>
           <button type="button" className="btn btn-danger" onClick={handleDelete} disabled={deleteLoading}>
             {deleteLoading ? 'Deleting...' : 'Delete Scan'}
           </button>

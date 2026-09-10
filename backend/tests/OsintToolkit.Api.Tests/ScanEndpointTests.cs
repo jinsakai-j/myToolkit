@@ -157,6 +157,28 @@ public sealed class ScanEndpointTests : IClassFixture<WebApplicationFactory<Prog
     }
 
     [Fact]
+    public async Task ExportScanJson_ReturnsDownloadableJson()
+    {
+        using var client = _factory.CreateClient();
+
+        var createResponse = await client.PostAsJsonAsync("/api/scans", new CreateScanRequest
+        {
+            Target = "export-test.com",
+            TargetType = TargetType.Domain,
+            Modules = new List<string>()
+        }, SerializerOptions);
+        var createdScan = await createResponse.Content.ReadFromJsonAsync<ScanResponse>(SerializerOptions);
+        Assert.NotNull(createdScan);
+
+        var response = await client.GetAsync($"/api/scans/{createdScan.Id}/export");
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        Assert.Equal("application/json", response.Content.Headers.ContentType?.MediaType);
+        Assert.Contains("export-test.com", await response.Content.ReadAsStringAsync());
+        Assert.Contains(".json", response.Content.Headers.ContentDisposition?.FileName ?? "");
+    }
+
+    [Fact]
     public async Task DeleteScan_WhenExists_ReturnsNoContent()
     {
         using var client = _factory.CreateClient();

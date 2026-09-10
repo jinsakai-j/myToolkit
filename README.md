@@ -5,36 +5,36 @@
 ![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6)
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-4169E1)
 ![License](https://img.shields.io/badge/License-MIT-green)
-![Project Status](https://img.shields.io/badge/Status-Sprint%205%20Subdomain%20Finder%20%2F%20Notes-blue)
+![Project Status](https://img.shields.io/badge/Status-Sprint%205b%20Subdomain%20Verify%20%2F%20Export-blueviolet)
 
 Local OSINT dashboard project for a cybersecurity and software engineering portfolio.
 
-The project is currently in **Sprint 5 - Passive Subdomain Finder / Scan Notes**. OSINT scan management (Sprint 1), six real modules (DNS, WHOIS/RDAP, email validation, username checker, IP reputation, passive subdomain finder), per-scan heuristic risk scores, and PDF report export (Sprint 4) are complete; scans now come with editable analyst notes.
+The project is currently in **Sprint 5b - Subdomain Verification / JSON Export**. OSINT scan management (Sprint 1), six real modules (DNS, WHOIS/RDAP, email validation, username checker, IP reputation, passive subdomain finder), passive subdomain-to-IP verification, per-scan heuristic risk scores, and PDF report export (Sprint 4) are complete; scans now support editable analyst notes and one-click JSON export.
 
 ## Project Status
 
 Current Version:
 
 ```text
-v0.5.0-alpha
+v0.5.1-alpha
 ```
 
 Current Sprint:
 
 ```text
-Sprint 5
+Sprint 5b
 ```
 
 Current Status:
 
 ```text
-Sprint 5 - Subdomain Finder / Scan Notes
+Sprint 5b - Subdomain Verification / JSON Export
 ```
 
 Next Milestone:
 
 ```text
-Sprint 6 - Python worker (on hold until a specific Python OSINT library justifies it)
+Sprint 6 - further OSINT modules or threat-intel feeds (or Python worker when justified)
 ```
 
 ## Tech Stack
@@ -180,6 +180,7 @@ EmailValidation -> Email
 UsernameChecker -> Username (GitHub, GitLab, HackerNews)
 IpReputation    -> IpAddress (ipinfo.io + heuristics, RiskScore 0-100)
 SubdomainFinder -> Domain (crt.sh certificate transparency)
+SubdomainResolve -> Domain (crt.sh candidates verified via A/AAAA DNS)
 ```
 
 Implemented in Sprint 4 - Report PDF:
@@ -192,6 +193,11 @@ Implemented in Sprint 5 - Passive Subdomain Finder / Scan Notes:
 
 - `SubdomainFinderModule`: passive subdomain enumeration from public certificate transparency logs (crt.sh), deduplicated and filtered to the target domain (wildcards and foreign names excluded). Fully passive; the target infrastructure is never contacted.
 - `PATCH /api/scans/{scanId}/notes` updates the analyst notes field; Scan Detail now has an inline notes editor instead of a hard-coded label.
+
+Implemented in Sprint 5b - Subdomain Verification / JSON Export:
+
+- `SubdomainResolveModule`: reuses the passive crt.sh candidates and resolves up to 25 of them to A/AAAA records via the built-in DNS resolver, so discovered subdomains get verified against live DNS. Only names already attested in public CT logs are resolved (no brute force). Shared crt.sh fetch helper now retries once on transient 5xx (crt.sh is occasionally flaky).
+- `GET /api/scans/{scanId}/export` downloads the full scan detail (metadata + module results) as formatted JSON, camelCase to match the rest of the API. Scan Detail page has an Export JSON button next to Back.
 
 Not implemented yet:
 

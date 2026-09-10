@@ -1,3 +1,7 @@
+using System.Text;
+using System.Text.Encodings.Web;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Mvc;
 using OsintToolkit.Api.Contracts.Requests;
 using OsintToolkit.Api.Contracts.Responses;
@@ -58,6 +62,35 @@ public sealed class ScanController(IScanService scanService) : ControllerBase
     {
         var scan = await scanService.UpdateNotesAsync(scanId, request.Notes, cancellationToken);
         return Ok(MapToScanResponse(scan));
+    }
+
+    [HttpGet("{scanId:guid}/export")]
+    public async Task<IActionResult> ExportScanJson([FromRoute] Guid scanId, CancellationToken cancellationToken)
+    {
+        var scan = await scanService.GetScanByIdAsync(scanId, cancellationToken);
+        var payload = MapToScanDetailResponse(scan);
+        var json = JsonSerializer.Serialize(payload, new JsonSerializerOptions
+        {
+            WriteIndented = true,
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+            Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
+            Converters = { new JsonStringEnumConverter() }
+        });
+
+        return File(
+            Encoding.UTF8.GetBytes(json),
+            "application/json",
+            $"scan-{SanitizeFileName(scan.Target)}.json");
+    }
+
+    private static string SanitizeFileName(string target)
+    {
+        var sanitized = new StringBuilder(target.Length);
+        foreach (var c in target)
+        {
+            sanitized.Append(char.IsLetterOrDigit(c) || c is '.' or '-' ? c : '_');
+        }
+        return sanitized.ToString();
     }
 
     private static ScanResponse MapToScanResponse(Scan scan)

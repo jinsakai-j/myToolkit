@@ -461,4 +461,41 @@ Sprint 3
 - Optional: verify subdomain findings (e.g. resolve the enumerated names) or export a subdomain list.
 - Python worker remains on hold per ADR-001 until a specific Python OSINT library justifies it.
 
+## 2026-09-10 (Sprint 5b - Subdomain Verification / JSON Export)
+
+### Progress
+- Implemented `SubdomainResolveModule`: re-fetches the passive crt.sh candidates (`FetchCertificateDataAsync`, shared with `SubdomainFinderModule`) and resolves up to 25 of them to A/AAAA records using the built-in `DnsResolver`. No wordlist/brute force: only names already attested in public certificate transparency logs are resolved.
+- Hardened the crt.sh fetch: both CT modules now retry once after 1.5 s on transient 5xx (crt.sh is occasionally flaky, observed a one-off 502/404).
+- Registered `SubdomainResolve` in `ModuleRegistry` (Modules, KnownIds, `SupportedFor(Domain)`).
+- Added `GET /api/scans/{scanId}/export`: returns the full scan detail (metadata + module results) as a downloadable formatted JSON file (`Content-Disposition: attachment`), serialized camelCase with relaxed escaping so raw JSON stays readable and consistent with the API.
+- Frontend: added the Subdomain Verification toggle in New Scan, and an Export JSON button (download link) in the Scan Detail header.
+- Verified end-to-end via API:
+  - `cloudflare.com` + SubdomainResolve -> Completed, "2 of 25 passive subdomain candidate(s) resolved to IP addresses"; `ajax.cloudflare.com`/`cdnjs.cloudflare.com` resolved to public IPs, historical `ssl*` names correctly returned no records.
+  - `GET /api/scans/{id}/export` -> HTTP 200, `application/json`, `Content-Disposition: filename=scan-cloudflare.com.json`, camelCase body containing module results.
+- Ran `dotnet test -m:1`: 82 tests passed (API 14, Core 64, Infrastructure 4).
+- Updated README to v0.5.1-alpha / Sprint 5b.
+
+### Files Added
+- `backend/src/OsintToolkit.Core/Modules/SubdomainResolveModule.cs`
+
+### Files Modified
+- `backend/src/OsintToolkit.Core/Modules/SubdomainFinderModule.cs` (shared retry helper)
+- `backend/src/OsintToolkit.Core/Modules/ModuleRegistry.cs`
+- `backend/src/OsintToolkit.Api/Controllers/ScanController.cs` (export endpoint)
+- `backend/tests/OsintToolkit.Core.Tests/ModuleRegistryTests.cs`
+- `backend/tests/OsintToolkit.Api.Tests/ScanEndpointTests.cs`
+- `frontend/src/pages/NewScan.tsx`
+- `frontend/src/api/scans.ts`
+- `frontend/src/pages/ScanDetail.tsx`
+- `README.md`
+- `docs/progress-log.md`
+
+### Commit
+(not committed)
+
+### Next Task
+- Optional: abuseipdb/VirusTotal API-key-backed reputation feed behind the public-data heuristic.
+- Optional: export CSV of resolved subdomains, or batch re-verify on demand.
+- Python worker remains on hold per ADR-001 until a specific Python OSINT library justifies it.
+
 

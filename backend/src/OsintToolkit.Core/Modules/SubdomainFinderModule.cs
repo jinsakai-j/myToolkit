@@ -12,7 +12,7 @@ namespace OsintToolkit.Core.Modules;
 /// </summary>
 public sealed class SubdomainFinderModule : IOSINTModule
 {
-    private const string CertificateTransparencyApi = "https://crt.sh/?q=%25.{0}&output=json";
+    internal const string CertificateTransparencyApi = "https://crt.sh/?q=%25.{0}&output=json";
 
     private static readonly HttpClient HttpClient = CreateHttpClient();
 
@@ -23,11 +23,7 @@ public sealed class SubdomainFinderModule : IOSINTModule
         var domain = NormalizeDomain(target);
         try
         {
-            var url = string.Format(CertificateTransparencyApi, Uri.EscapeDataString(domain));
-            using var response = await HttpClient.GetAsync(url, HttpCompletionOption.ResponseHeadersRead, cancellationToken).ConfigureAwait(false);
-            response.EnsureSuccessStatusCode();
-
-            var json = await response.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false);
+            var json = await FetchCertificateDataAsync(domain, cancellationToken).ConfigureAwait(false);
             var subdomains = ParseCertificateData(json, domain);
 
             var payload = new
@@ -60,6 +56,42 @@ public sealed class SubdomainFinderModule : IOSINTModule
                 RawData = JsonSerializer.Serialize(new { domain, error = ex.Message })
             };
         }
+    }
+
+    /// <summary>
+    /// Fetches the crt.sh JSON payload for a domain with a single retry, since
+    /// crt.sh occasionally returns transient 5xx responses.
+    /// </summary>
+    internal static async Task<string> FetchCertificateDataAsync(string domain, CancellationToken cancellationToken)
+    {
+        const int maxAttempts = 2;
+        Exception? lastError = null;
+
+        for (var attempt = 0; attempt < maxAttempts; attempt++)
+        {
+            if (attempt > 0)
+            {
+                await Task.Delay(TimeSpan.FromSeconds(1.5), cancellationToken).ConfigureAwait(false);
+            }
+
+            var url = string.Format(CertificateTransparencyApi, Uri.EscapeDataString(domain));
+            try
+            {
+                using var response = await HttpClient.GetAsync(url, HttpCompletionOption.ResponseHeadersRead, cancellationToken).ConfigureAwait(false);
+                if (response.IsSuccessStatusCode)
+                {
+                    return await response.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false);
+                }
+
+                lastError = new HttpRequestException($"Certificate transparency query failed with status {(int)response.StatusCode}.");
+            }
+            catch (HttpRequestException ex)
+            {
+                lastError = ex;
+            }
+        }
+
+        throw lastError ?? new HttpRequestException("Certificate transparency query failed.");
     }
 
     /// <summary>
