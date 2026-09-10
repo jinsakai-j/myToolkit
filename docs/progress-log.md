@@ -336,4 +336,44 @@ Sprint 2
 - Implement Sprint 3 modules: UsernameChecker (platform presence) and IpReputation (threat intelligence feed).
 - Revisit traditional port-43 WHOIS as an optional fallback behind RDAP.
 
+## 2026-09-10
+
+### Sprint
+Sprint 3
+
+### Progress
+- Implemented `UsernameCheckerModule`: checks public profile existence on GitHub (`/users/{username}`), GitLab (`/users?username=`), and HackerNews (Firebase v0 API) using unauthenticated JSON endpoints. Captures profile metadata (name, followers, repos, karma, web URL) for found platforms.
+- Implemented `IpReputationModule`: enriches an IP with public ipinfo.io data (hostname, org, geolocation, anycast) and derives a heuristic risk score (0-100) from Tor exit/proxy/VPN/abuse hostname and org signals. No API key required.
+- Added `RiskScore` to `OSINTModuleResult` and plumbed the highest module risk into the scan's `RiskScore` so the Dashboard and Scan Detail can show `x/100`.
+- Registered both modules in `ModuleRegistry`; removed the recognized-but-unimplemented placeholders.
+- Verified end-to-end via API:
+  - `torvalds` -> UsernameChecker Completed, found on GitHub (1 of 3 platforms).
+  - nonexistent username -> Completed, not found on any platform.
+  - `8.8.8.8` -> IpReputation Completed, risk 5/100 (anycast).
+  - `185.220.101.4` (Tor exit) -> IpReputation Completed, risk 55/100 (tor/exit signals).
+- Ran `dotnet test -m:1`: 62 tests passed (API 7, Core 51, Infrastructure 4).
+- Updated README to v0.3.0-alpha / Sprint 3, frontend labels, and cleaned up verification data.
+
+### Files Added
+- `backend/src/OsintToolkit.Core/Modules/UsernameCheckerModule.cs`
+- `backend/src/OsintToolkit.Core/Modules/IpReputationModule.cs`
+
+### Files Modified
+- `backend/src/OsintToolkit.Core/Modules/OSINTModuleResult.cs`
+- `backend/src/OsintToolkit.Core/Modules/ModuleRegistry.cs`
+- `backend/src/OsintToolkit.Core/Services/ScanService.cs`
+- `backend/tests/OsintToolkit.Core.Tests/ModuleRegistryTests.cs`
+- `backend/tests/OsintToolkit.Core.Tests/ScanServiceTests.cs`
+- `README.md`
+- `frontend/src/App.tsx`
+- `frontend/src/pages/NewScan.tsx`
+- `docs/progress-log.md`
+
+### Commit
+(not committed)
+
+### Next Task
+- Sprint 4: Report PDF generation from scan results.
+- Optional: add abuseipdb/VirusTotal API-key-backed reputation feed behind the public-data heuristic.
+
 

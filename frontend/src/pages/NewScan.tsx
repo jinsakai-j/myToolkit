@@ -121,7 +121,7 @@ export function NewScan({ onBack, onScanCreated }: NewScanProps) {
     <section className="content">
       <header className="page-header">
         <div>
-          <p className="eyebrow">Sprint 2</p>
+          <p className="eyebrow">Sprint 3</p>
           <h2>Create New Scan</h2>
         </div>
         <button type="button" className="btn btn-secondary" onClick={onBack} disabled={loading}>

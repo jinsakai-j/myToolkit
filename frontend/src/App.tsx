@@ -67,7 +67,7 @@ export function App() {
         </nav>
         <div className="sidebar-footer">
           <span className="text-muted" style={{ fontSize: '11px', color: '#64748b' }}>
-            v0.2 - MVP Build
+            v0.3 - OSINT Toolkit
           </span>
         </div>
       </aside>

@@ -7,4 +7,5 @@ public sealed class OSINTModuleResult
     public ModuleStatus Status { get; set; } = ModuleStatus.Pending;
     public string? Summary { get; set; }
     public string RawData { get; set; } = "{}";
+    public int? RiskScore { get; set; }
 }

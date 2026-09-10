@@ -26,13 +26,14 @@ public sealed class ModuleRegistryTests
         Assert.IsType<DnsLookupModule>(ModuleRegistry.Resolve("DnsLookup"));
         Assert.IsType<WhoisLookupModule>(ModuleRegistry.Resolve("WhoisLookup"));
         Assert.IsType<EmailValidationModule>(ModuleRegistry.Resolve("EmailValidation"));
+        Assert.IsType<UsernameCheckerModule>(ModuleRegistry.Resolve("UsernameChecker"));
+        Assert.IsType<IpReputationModule>(ModuleRegistry.Resolve("IpReputation"));
     }
 
     [Fact]
-    public void Resolve_ReturnsNullForRecognizedButNotImplementedModules()
+    public void Resolve_ReturnsNullForUnknownModule()
     {
-        Assert.Null(ModuleRegistry.Resolve("UsernameChecker"));
-        Assert.Null(ModuleRegistry.Resolve("IpReputation"));
+        Assert.Null(ModuleRegistry.Resolve("TotallyUnknown"));
     }
 
     [Theory]
@@ -43,6 +44,14 @@ public sealed class ModuleRegistryTests
     public void SupportedFor_MatchesFrontendModuleDefinitions(TargetType targetType, string[] expected)
     {
         Assert.Equal(expected, ModuleRegistry.SupportedFor(targetType));
+    }
+
+    [Fact]
+    public async Task IpReputationModule_WithInvalidIp_ReturnsFailedWithoutNetwork()
+    {
+        var result = await new IpReputationModule().ExecuteAsync("999.1.1.1", TargetType.IpAddress);
+
+        Assert.Equal(ModuleStatus.Failed, result.Status);
     }
 
     [Fact]
@@ -57,5 +66,9 @@ public sealed class ModuleRegistryTests
             new WhoisLookupModule().ExecuteAsync("example.com", TargetType.Domain, cts.Token));
         await Assert.ThrowsAnyAsync<OperationCanceledException>(() =>
             new EmailValidationModule().ExecuteAsync("user@example.com", TargetType.Email, cts.Token));
+        await Assert.ThrowsAnyAsync<OperationCanceledException>(() =>
+            new UsernameCheckerModule().ExecuteAsync("someuser", TargetType.Username, cts.Token));
+        await Assert.ThrowsAnyAsync<OperationCanceledException>(() =>
+            new IpReputationModule().ExecuteAsync("8.8.8.8", TargetType.IpAddress, cts.Token));
     }
 }

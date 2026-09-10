@@ -105,6 +105,30 @@ public sealed class ScanServiceTests
     }
 
     [Fact]
+    public async Task CreateScanAsync_SetsRiskScoreFromModule()
+    {
+        var repository = new FakeScanRepository();
+        var service = new ScanService(repository, _ => new FakeModule(ModuleStatus.Completed, "ok", riskScore: 42));
+        var modules = new List<string> { "IpReputation" };
+
+        var scan = await service.CreateScanAsync("8.8.8.8", TargetType.IpAddress, modules);
+
+        Assert.Equal(42, scan.RiskScore);
+    }
+
+    [Fact]
+    public async Task CreateScanAsync_WithoutRiskModule_LeavesRiskScoreNull()
+    {
+        var repository = new FakeScanRepository();
+        var service = new ScanService(repository, _ => new FakeModule(ModuleStatus.Completed, "ok"));
+        var modules = new List<string> { "DnsLookup" };
+
+        var scan = await service.CreateScanAsync("google.com", TargetType.Domain, modules);
+
+        Assert.Null(scan.RiskScore);
+    }
+
+    [Fact]
     public async Task GetScanByIdAsync_WhenExists_ReturnsScan()
     {
         var repository = new FakeScanRepository();
@@ -155,11 +179,13 @@ public sealed class ScanServiceTests
     {
         private readonly ModuleStatus _status;
         private readonly string _summary;
+        private readonly int? _riskScore;
 
-        public FakeModule(ModuleStatus status, string summary)
+        public FakeModule(ModuleStatus status, string summary, int? riskScore = null)
         {
             _status = status;
             _summary = summary;
+            _riskScore = riskScore;
         }
 
         public string Name => "Fake";
@@ -170,7 +196,8 @@ public sealed class ScanServiceTests
             {
                 Status = _status,
                 Summary = _summary,
-                RawData = "{\"fake\": true}"
+                RawData = "{\"fake\": true}",
+                RiskScore = _riskScore
             });
         }
     }

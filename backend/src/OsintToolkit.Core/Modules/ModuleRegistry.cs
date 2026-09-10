@@ -13,7 +13,9 @@ public sealed class ModuleRegistry
     {
         [new DnsLookupModule().Name] = new DnsLookupModule(),
         [new WhoisLookupModule().Name] = new WhoisLookupModule(),
-        [new EmailValidationModule().Name] = new EmailValidationModule()
+        [new EmailValidationModule().Name] = new EmailValidationModule(),
+        [new UsernameCheckerModule().Name] = new UsernameCheckerModule(),
+        [new IpReputationModule().Name] = new IpReputationModule()
     };
 
     private static readonly HashSet<string> KnownIds = new(StringComparer.OrdinalIgnoreCase)

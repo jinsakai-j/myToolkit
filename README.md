@@ -5,36 +5,36 @@
 ![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6)
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-4169E1)
 ![License](https://img.shields.io/badge/License-MIT-green)
-![Project Status](https://img.shields.io/badge/Status-Sprint%202%20Real%20OSINT%20Modules-yellow)
+![Project Status](https://img.shields.io/badge/Status-Sprint%203%20Username%20Checker%20%2F%20IP%20Reputation-yellow)
 
 Local OSINT dashboard project for a cybersecurity and software engineering portfolio.
 
-The project is currently in **Sprint 2 - Real OSINT Modules**. Scan management (Sprint 1) is complete, and the first real OSINT modules (DNS lookup, WHOIS lookup, and email validation) are implemented and wired into scan runs.
+The project is currently in **Sprint 3 - Username Checker / IP Reputation**. OSINT scan management (Sprint 1) and four real modules (DNS, WHOIS/RDAP, email validation, username checker) are complete; IP reputation now enriches lookup data with a heuristic risk score.
 
 ## Project Status
 
 Current Version:
 
 ```text
-v0.2.0-alpha
+v0.3.0-alpha
 ```
 
 Current Sprint:
 
 ```text
-Sprint 2
+Sprint 3
 ```
 
 Current Status:
 
 ```text
-Sprint 2 - Real OSINT Modules
+Sprint 3 - Username Checker / IP Reputation
 ```
 
 Next Milestone:
 
 ```text
-Sprint 3 - Username Checker / IP Reputation
+Sprint 4 - Report PDF
 ```
 
 ## Tech Stack
@@ -166,20 +166,23 @@ Implemented in Sprint 2 - Real OSINT modules:
 - WHOIS lookup via the RDAP bootstrap service (machine-readable successor to port 43 WHOIS)
 - Email validation (format + MX record check)
 
-Sprint 2 module ids used by the frontend:
+Implemented in Sprint 3 - more OSINT modules:
+
+- Username checker (GitHub, GitLab, HackerNews public profile lookup)
+- IP reputation (ipinfo.io enrichment plus heuristic risk signals from Tor/proxy/VPN host hints, with scan risk score)
+
+Module ids used by the frontend:
 
 ```text
 DnsLookup       -> Domain, IpAddress (reverse)
-WhoisLookup     -> Domain
+WhoisLookup     -> Domain (RDAP)
 EmailValidation -> Email
-UsernameChecker -> recognized but not implemented yet
-IpReputation    -> recognized but not implemented yet
+UsernameChecker -> Username (GitHub, GitLab, HackerNews)
+IpReputation    -> IpAddress (ipinfo.io + heuristics, RiskScore 0-100)
 ```
 
 Not implemented yet:
 
-- Username checker (platform presence lookup)
-- IP reputation (threat intelligence feeds)
 - Report PDF
 - Python worker
 

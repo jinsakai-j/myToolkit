@@ -42,12 +42,14 @@ public sealed class ScanService : IScanService
             Status = ScanStatus.Pending,
             CreatedAt = DateTimeOffset.UtcNow,
             StartedAt = DateTimeOffset.UtcNow,
-            Notes = "Sprint 2 - Real OSINT Modules"
+            Notes = "Sprint 3 - OSINT Modules"
         };
 
         var moduleNames = (modules ?? new List<string>())
             .Distinct(StringComparer.OrdinalIgnoreCase)
             .ToList();
+
+        int? highestRisk = null;
 
         if (moduleNames.Count > 0)
         {
@@ -70,12 +72,22 @@ public sealed class ScanService : IScanService
 
                 var result = await runner.ExecuteAsync(scan.Target, scan.TargetType, cancellationToken).ConfigureAwait(false);
                 scan.Results.Add(CreateResult(scan.Id, moduleName, result.Status, result.Summary, result.RawData));
+
+                if (result.RiskScore.HasValue &&
+                    (!highestRisk.HasValue || result.RiskScore.Value > highestRisk.Value))
+                {
+                    highestRisk = result.RiskScore.Value;
+                }
             }
         }
 
         scan.Status = scan.Results.Any(r => r.Status == ModuleStatus.Failed)
             ? ScanStatus.Failed
             : ScanStatus.Completed;
+        if (scan.Results.Count > 0)
+        {
+            scan.RiskScore = highestRisk;
+        }
         scan.CompletedAt = DateTimeOffset.UtcNow;
 
         await _scanRepository.AddAsync(scan, cancellationToken);
